@@ -1,30 +1,24 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MobileNav } from "./mobile-nav";
 import { navLinks } from "./nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { MVWCLogo } from "@/components/mvwc-logo";
 
 export function Navbar() {
   const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div className="container flex h-20 items-center justify-between px-6 md:px-8">
+      <div className="flex h-20 items-center justify-between px-6 md:px-8">
         <div className="flex items-center gap-12">
           <Link
             href="/"
-            className="flex items-center transition-opacity hover:opacity-80 py-2"
+            className="flex items-center transition-opacity hover:opacity-80 py-2 text-primary"
           >
-            <Image
-              src="/main-logo.svg"
-              alt="MVWC Logo"
-              width={120}
-              height={40}
-              className="h-10 w-auto"
-              priority
-            />
+            <MVWCLogo className="h-10 w-auto" />
           </Link>
           <nav className="hidden lg:flex items-center gap-2">
             {navLinks.map((link) => (
@@ -47,7 +41,12 @@ export function Navbar() {
             ))}
           </nav>
         </div>
-        <MobileNav />
+        <div className="flex items-center">
+          <MobileNav />
+          <div className="hidden lg:flex">
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
     </header>
   );

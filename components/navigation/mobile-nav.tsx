@@ -1,7 +1,6 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +13,8 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { navLinks } from "./nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { MVWCLogo } from "@/components/mvwc-logo";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -21,25 +22,22 @@ export function MobileNav() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden hover:bg-accent transition-colors"
-        >
-          {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          <span className="sr-only">Toggle menu</span>
-        </Button>
-      </SheetTrigger>
+      <div className="flex items-center gap-4 lg:hidden">
+        <ThemeToggle />
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hover:bg-accent transition-colors"
+          >
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <span className="sr-only">Toggle menu</span>
+          </Button>
+        </SheetTrigger>
+      </div>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <SheetHeader className="mb-8 flex items-center gap-3">
-          <Image
-            src="/main-logo.svg"
-            alt="MVWC Logo"
-            width={80}
-            height={26}
-            className="h-8 w-auto"
-          />
+        <SheetHeader className="mb-8 flex items-center gap-3 text-primary">
+          <MVWCLogo className="h-8 w-auto" />
         </SheetHeader>
         <Separator className="my-6" />
         <nav className="flex flex-col space-y-2">
