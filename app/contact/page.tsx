@@ -14,7 +14,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h2 className="text-xl font-semibold mb-2">Location</h2>
-              <p className="text-muted-foreground">Mount Vernon, Washington</p>
+              <p className="text-muted-foreground">Mount Vernon, IA</p>
             </div>
             <div>
               <h2 className="text-xl font-semibold mb-2">Hours</h2>
