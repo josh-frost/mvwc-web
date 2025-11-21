@@ -10,7 +10,6 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -33,16 +32,14 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <SheetHeader className="mb-8">
-          <SheetTitle className="text-left flex items-center gap-3">
-            <Image
-              src="/main-logo.svg"
-              alt="MVWC Logo"
-              width={80}
-              height={26}
-              className="h-8 w-auto"
-            />
-          </SheetTitle>
+        <SheetHeader className="mb-8 flex items-center gap-3">
+          <Image
+            src="/main-logo.svg"
+            alt="MVWC Logo"
+            width={80}
+            height={26}
+            className="h-8 w-auto"
+          />
         </SheetHeader>
         <Separator className="my-6" />
         <nav className="flex flex-col space-y-2">
