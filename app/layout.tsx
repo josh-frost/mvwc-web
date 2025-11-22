@@ -37,7 +37,7 @@ export default function RootLayout({
                   if (theme && Object.prototype.hasOwnProperty.call(themeMap, theme)) {
                     document.documentElement.classList.add(themeMap[theme]);
                   } else {
-                    document.documentElement.classList.add(themeMap['home']);
+                    document.documentElement.classList.add(themeMap.home);
                   }
                 } catch (e) {
                   document.documentElement.classList.add('theme-home');
