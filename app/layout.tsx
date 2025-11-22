@@ -32,11 +32,12 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('mvwc-theme');
-                  if (theme && ['home', 'away', 'dark'].includes(theme)) {
-                    document.documentElement.classList.add('theme-' + theme);
+                  const themeMap = { home: 'theme-home', away: 'theme-away', dark: 'theme-dark' };
+                  const theme = localStorage.getItem('mvwc-theme');
+                  if (theme && Object.prototype.hasOwnProperty.call(themeMap, theme)) {
+                    document.documentElement.classList.add(themeMap[theme]);
                   } else {
-                    document.documentElement.classList.add('theme-home');
+                    document.documentElement.classList.add(themeMap.home);
                   }
                 } catch (e) {
                   document.documentElement.classList.add('theme-home');
