@@ -35,7 +35,7 @@ export function MobileNav() {
           </Button>
         </SheetTrigger>
       </div>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+      <SheetContent side="right" className="w-80">
         <SheetHeader className="mb-8 flex items-center gap-3 text-primary">
           <MVWCLogo className="h-8 w-auto" />
         </SheetHeader>
@@ -46,7 +46,7 @@ export function MobileNav() {
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className={`text-base sm:text-lg font-semibold transition-all duration-200 hover:text-foreground hover:translate-x-1 py-3 ${
+              className={`text-lg font-semibold transition-all duration-200 hover:text-foreground hover:translate-x-1 py-3 ${
                 pathname === link.href
                   ? "text-foreground border-l-2 border-primary pl-4"
                   : "text-muted-foreground pl-4"
