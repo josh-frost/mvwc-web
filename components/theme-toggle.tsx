@@ -27,7 +27,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 py-2 px-3 text-xs font-medium hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
           title="Change theme"
         >
           {currentTheme?.label}
