@@ -45,6 +45,10 @@
   --radius: 0.625rem;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Home Theme - Dark Magenta (#702E3E) with Gray Logo */
 .theme-home {
   --background: 345 42% 31%;
@@ -156,5 +160,25 @@
   }
   body {
     @apply bg-background text-foreground px-4 md:px-6 lg:px-8;
+  }
+}
+
+/* Prevent padding shift when Radix UI applies scroll lock */
+body[data-scroll-locked] {
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 768px) {
+  body[data-scroll-locked] {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  body[data-scroll-locked] {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
   }
 }
