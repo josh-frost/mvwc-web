@@ -26,6 +26,27 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const themeMap = { home: 'theme-home', away: 'theme-away', dark: 'theme-dark' };
+                  const theme = localStorage.getItem('mvwc-theme');
+                  if (theme && Object.prototype.hasOwnProperty.call(themeMap, theme)) {
+                    document.documentElement.classList.add(themeMap[theme]);
+                  } else {
+                    document.documentElement.classList.add(themeMap.home);
+                  }
+                } catch (e) {
+                  document.documentElement.classList.add('theme-home');
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider defaultTheme="home">
           <Navbar />
