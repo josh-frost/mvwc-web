@@ -12,8 +12,8 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div className="flex h-20 items-center justify-between px-6 md:px-8">
-        <div className="flex items-center gap-12">
+      <div className="flex h-20 items-center justify-between px-4">
+        <div className="flex items-center gap-8">
           <Link
             href="/"
             className="flex items-center transition-opacity hover:opacity-80 py-2 text-primary"
@@ -25,7 +25,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm lg:text-base xl:text-lg font-semibold transition-all duration-200 hover:text-foreground relative group px-4 py-6 ${
+                className={`text-base font-semibold transition-all duration-200 hover:text-background hover:bg-accent/50 relative group px-4 py-6 ${
                   pathname === link.href ? "text-foreground" : "text-muted-foreground"
                 }`}
               >

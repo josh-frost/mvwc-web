@@ -50,7 +50,7 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider defaultTheme="home">
           <Navbar />
-          {children}
+          <div className="flex flex-col items-center">{children}</div>
         </ThemeProvider>
       </body>
     </html>
