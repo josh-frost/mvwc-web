@@ -25,7 +25,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-base font-semibold transition-all duration-200 hover:text-accent-foreground hover:bg-accent/50 relative group px-4 py-6 ${
+                className={`text-base font-semibold transition-all duration-200 hover:text-foreground hover:bg-white/10 relative group px-4 py-6 ${
                   pathname === link.href ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
