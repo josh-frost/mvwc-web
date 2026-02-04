@@ -17,7 +17,7 @@ export default async function Home() {
         <h1 className="w-max text-center text-4xl font-semibold py-5 text-foreground">
           {homePage?.showComingSoon !== false ? "Coming Soon" : homePage?.title}
         </h1>
-        {homePage?.subtitle && !homePage?.showComingSoon && (
+        {homePage?.subtitle && homePage?.showComingSoon === false && (
           <p className="text-center text-xl text-muted-foreground">{homePage.subtitle}</p>
         )}
       </main>
