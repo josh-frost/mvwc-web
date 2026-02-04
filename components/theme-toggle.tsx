@@ -27,10 +27,10 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 py-2 px-3 text-xs font-medium hover:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="h-9 py-2 px-3 text-sm md:text-base font-medium focus-visible:ring-0 focus-visible:ring-offset-0"
           title="Change theme"
         >
-          {currentTheme?.label}
+          Theme
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[100px]">
