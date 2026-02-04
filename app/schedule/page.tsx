@@ -44,7 +44,11 @@ export default async function SchedulePage() {
     ) || [];
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    // Append T00:00:00 to treat the date as local time, not UTC
+    // Without this, "2026-02-15" is parsed as midnight UTC, which can
+    // display as the previous day in timezones behind UTC
+    const localDate = new Date(dateString + "T00:00:00");
+    return localDate.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
