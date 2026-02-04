@@ -9,6 +9,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
@@ -37,6 +38,7 @@ export function MobileNav() {
       </div>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
         <SheetHeader className="mb-8 flex items-center gap-3 text-primary">
+          <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
           <MVWCLogo className="h-8 w-auto" />
         </SheetHeader>
         <Separator className="my-6" />

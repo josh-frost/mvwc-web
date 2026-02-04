@@ -12,7 +12,7 @@ export default async function AboutPage() {
   const { data: aboutPage } = await sanityFetch({ query: ABOUT_QUERY });
 
   return (
-    <main className="container py-12 md:py-24">
+    <main className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-6">
           {aboutPage?.title || "Mount Vernon Wrestling Club"}

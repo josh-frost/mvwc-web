@@ -16,7 +16,7 @@ export default async function ContactPage() {
   const location = [contactInfo?.city, contactInfo?.state].filter(Boolean).join(", ");
 
   return (
-    <div className="container py-12 md:py-24">
+    <div className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-6">Contact Us</h1>
         <div className="space-y-6">
