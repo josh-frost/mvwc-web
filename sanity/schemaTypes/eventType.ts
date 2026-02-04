@@ -125,7 +125,10 @@ export const eventType = defineType({
       const typeLabel = eventType
         ? eventType.charAt(0).toUpperCase() + eventType.slice(1)
         : "Event";
-      const dateStr = date ? new Date(date).toLocaleDateString() : "No date";
+      // Append T00:00:00 to treat the date as local time, not UTC
+      const dateStr = date
+        ? new Date(date + "T00:00:00").toLocaleDateString()
+        : "No date";
       const subtitle = opponent
         ? `${typeLabel} vs ${opponent} - ${dateStr}`
         : `${typeLabel} - ${dateStr}`;
