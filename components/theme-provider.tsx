@@ -40,13 +40,13 @@ export function ThemeProvider({
 
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     // Remove all theme classes
     root.classList.remove("theme-home", "theme-away", "theme-dark");
-    
+
     // Add the current theme class
     root.classList.add(`theme-${theme}`);
-    
+
     // Save to localStorage
     localStorage.setItem(storageKey, theme);
   }, [theme, storageKey]);

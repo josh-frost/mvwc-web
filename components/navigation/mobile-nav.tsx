@@ -29,7 +29,7 @@ export function MobileNav() {
           <Button
             variant="ghost"
             size="icon"
-            className="hover:bg-accent transition-colors"
+            className="hover:bg-foreground/20 transition-colors"
           >
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             <span className="sr-only">Toggle menu</span>
