@@ -7,8 +7,15 @@ const HOME_QUERY = `*[_type == "homePage" && _id == "homePage"][0]{
   showComingSoon
 }`;
 
+type HomePageData = {
+  title?: string;
+  subtitle?: string;
+  showComingSoon?: boolean;
+};
+
 export default async function Home() {
-  const { data: homePage } = await sanityFetch({ query: HOME_QUERY });
+  const { data } = await sanityFetch({ query: HOME_QUERY });
+  const homePage = data as HomePageData | null;
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-5rem)] bg-background font-sans">

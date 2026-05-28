@@ -19,7 +19,6 @@ export function ThemeToggle() {
     { value: "dark" as const, label: "Dark" },
   ];
 
-  const currentTheme = themes.find((t) => t.value === theme);
 
   return (
     <DropdownMenu>

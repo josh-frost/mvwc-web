@@ -35,13 +35,13 @@ type Event = {
 };
 
 export default async function SchedulePage() {
-  const { data: events } = await sanityFetch({ query: EVENTS_QUERY });
+  const { data } = await sanityFetch({ query: EVENTS_QUERY });
+  const events = (data as Event[]) || [];
 
-  const practices = events?.filter((e: Event) => e.eventType === "practice") || [];
-  const matches =
-    events?.filter(
-      (e: Event) => e.eventType === "match" || e.eventType === "tournament",
-    ) || [];
+  const practices = events.filter((e: Event) => e.eventType === "practice");
+  const matches = events.filter(
+    (e: Event) => e.eventType === "match" || e.eventType === "tournament",
+  );
 
   const formatDate = (dateString: string) => {
     // Append T00:00:00 to treat the date as local time, not UTC

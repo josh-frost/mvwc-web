@@ -10,8 +10,24 @@ const CONTACT_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
   socialLinks
 }`;
 
+type SocialLink = {
+  platform: string;
+  url: string;
+};
+
+type ContactInfo = {
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  hours?: string;
+  socialLinks?: SocialLink[];
+};
+
 export default async function ContactPage() {
-  const { data: contactInfo } = await sanityFetch({ query: CONTACT_QUERY });
+  const { data } = await sanityFetch({ query: CONTACT_QUERY });
+  const contactInfo = data as ContactInfo | null;
 
   const location = [contactInfo?.city, contactInfo?.state].filter(Boolean).join(", ");
 
@@ -59,8 +75,7 @@ export default async function ContactPage() {
               <div>
                 <h2 className="text-xl font-semibold mb-2">Follow Us</h2>
                 <div className="flex gap-4">
-                  {contactInfo.socialLinks.map(
-                    (link: { platform: string; url: string }, index: number) => (
+                  {contactInfo.socialLinks.map((link: SocialLink, index: number) => (
                       <a
                         key={index}
                         href={link.url}
@@ -70,8 +85,7 @@ export default async function ContactPage() {
                       >
                         {link.platform}
                       </a>
-                    ),
-                  )}
+                    ))}
                 </div>
               </div>
             )}
