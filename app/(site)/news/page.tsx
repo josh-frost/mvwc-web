@@ -1,5 +1,6 @@
 import { sanityFetch } from "@/sanity/lib/live";
 import { PortableText } from "next-sanity";
+import type { PortableTextBlock } from "@portabletext/types";
 
 const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc){
   _id,
@@ -16,11 +17,12 @@ type Post = {
   slug: { current: string };
   publishedAt: string;
   excerpt?: string;
-  body: any[];
+  body: PortableTextBlock[];
 };
 
 export default async function NewsPage() {
-  const { data: posts } = await sanityFetch({ query: POSTS_QUERY });
+  const { data } = await sanityFetch({ query: POSTS_QUERY });
+  const posts = data as Post[];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {

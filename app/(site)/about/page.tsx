@@ -1,5 +1,6 @@
 import { sanityFetch } from "@/sanity/lib/live";
 import { PortableText } from "next-sanity";
+import type { PortableTextBlock } from "@portabletext/types";
 
 const ABOUT_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
   title,
@@ -8,8 +9,16 @@ const ABOUT_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
   history
 }`;
 
+type AboutPageData = {
+  title?: string;
+  mission?: string;
+  body?: PortableTextBlock[];
+  history?: PortableTextBlock[];
+};
+
 export default async function AboutPage() {
-  const { data: aboutPage } = await sanityFetch({ query: ABOUT_QUERY });
+  const { data } = await sanityFetch({ query: ABOUT_QUERY });
+  const aboutPage = data as AboutPageData | null;
 
   return (
     <main className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
