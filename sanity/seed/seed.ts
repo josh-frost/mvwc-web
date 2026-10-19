@@ -6,7 +6,10 @@
  *
  * Runs via `sanity exec --with-user-token`, so it uses your `sanity login` session.
  * Documents use fixed IDs, so re-running replaces them instead of duplicating.
+ * Placeholder images in ./images are uploaded once; Sanity dedupes identical uploads.
  */
+import { createReadStream } from "node:fs";
+import path from "node:path";
 import { getCliClient } from "sanity/cli";
 
 const dataset = process.env.SEED_DATASET || "development";
@@ -280,10 +283,59 @@ const documents: Array<{ _id: string; _type: string; [field: string]: unknown }>
   },
 ];
 
+// Placeholder images (sanity/seed/images) and where they go, by document _id
+const images = {
+  hero: { file: "hero.jpg", alt: "Sample hero image in club colors" },
+  about: { file: "about.jpg", alt: "Sample About page image" },
+  postWelcome: { file: "post-welcome.jpg", alt: "Sample cover image for the new season post" },
+  postRecap: { file: "post-recap.jpg", alt: "Sample cover image for the season opener recap" },
+};
+type ImageName = keyof typeof images;
+
+const imageFields: Record<string, Record<string, ImageName>> = {
+  homePage: { heroImage: "hero" },
+  aboutPage: { image: "about" },
+  "seed-post-welcome": { coverImage: "postWelcome" },
+  "seed-post-opener-recap": { coverImage: "postRecap" },
+};
+
+// Inline images appended to a document's body, to exercise rich-text image rendering
+const bodyImages: Record<string, ImageName> = {
+  "seed-post-opener-recap": "about",
+};
+
+type ImageValue = { _type: "image"; asset: { _type: "reference"; _ref: string }; alt: string };
+
+async function uploadImages() {
+  const uploaded = {} as Record<ImageName, ImageValue>;
+  for (const name of Object.keys(images) as ImageName[]) {
+    const { file, alt } = images[name];
+    const asset = await client.assets.upload(
+      "image",
+      createReadStream(path.join(process.cwd(), "sanity/seed/images", file)),
+      { filename: file },
+    );
+    uploaded[name] = { _type: "image", asset: { _type: "reference", _ref: asset._id }, alt };
+  }
+  return uploaded;
+}
+
 async function main() {
   const { projectId } = client.config();
-  console.log(`Seeding ${documents.length} documents into ${projectId}/${dataset}…`);
+  console.log(`Uploading ${Object.keys(images).length} images to ${projectId}/${dataset}…`);
+  const uploaded = await uploadImages();
 
+  for (const doc of documents) {
+    for (const [field, name] of Object.entries(imageFields[doc._id] ?? {})) {
+      doc[field] = uploaded[name];
+    }
+    const bodyImage = bodyImages[doc._id];
+    if (bodyImage && Array.isArray(doc.body)) {
+      doc.body = [...doc.body, { ...uploaded[bodyImage], _key: key() }];
+    }
+  }
+
+  console.log(`Seeding ${documents.length} documents into ${projectId}/${dataset}…`);
   const tx = client.transaction();
   for (const doc of documents) tx.createOrReplace(doc);
   await tx.commit({ visibility: "async" });
