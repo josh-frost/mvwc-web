@@ -21,3 +21,12 @@ export function formatEventTime(start: string, end?: string) {
     });
   return end ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
 }
+
+export function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", {
+    timeZone: SITE_TIME_ZONE,
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}

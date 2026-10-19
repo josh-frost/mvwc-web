@@ -1,36 +1,39 @@
+import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
-import { PortableText } from "next-sanity";
-import type { PortableTextBlock } from "@portabletext/types";
+import { ContentSections } from "@/components/content-sections";
+import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
+import { formatDate } from "@/lib/datetime";
 
-const POSTS_QUERY = `*[_type == "post"] | order(publishedAt desc){
+const POSTS_QUERY = `*[_type == "post" && defined(slug.current)] | order(publishedAt desc){
   _id,
   title,
-  slug,
+  "slug": slug.current,
   publishedAt,
+  coverImage,
   excerpt,
-  body
+  "bodyText": pt::text(body)
 }`;
 
-type Post = {
+type PostSummary = {
   _id: string;
   title: string;
-  slug: { current: string };
-  publishedAt: string;
+  slug: string;
+  publishedAt?: string;
+  coverImage?: SanityImageValue;
   excerpt?: string;
-  body: PortableTextBlock[];
+  bodyText?: string;
 };
+
+// Fall back to the start of the body when a post has no excerpt.
+function summary(post: PostSummary) {
+  if (post.excerpt) return post.excerpt;
+  const text = post.bodyText?.trim() ?? "";
+  return text.length > 200 ? `${text.slice(0, 200).replace(/\s+\S*$/, "")}…` : text;
+}
 
 export default async function NewsPage() {
   const { data } = await sanityFetch({ query: POSTS_QUERY });
-  const posts = data as Post[];
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  const posts = (data as PostSummary[] | null) ?? [];
 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
@@ -41,23 +44,43 @@ export default async function NewsPage() {
             Latest news and updates from Mount Vernon Wrestling Club.
           </p>
 
-          {posts && posts.length > 0 ? (
+          <ContentSections page="news" />
+
+          {posts.length > 0 ? (
             <div className="space-y-6">
-              {posts.map((post: Post) => (
-                <article key={post._id} className="border rounded-lg p-6">
-                  <h2 className="text-xl font-semibold mb-2">{post.title}</h2>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Posted: {formatDate(post.publishedAt)}
-                  </p>
-                  {post.excerpt ? (
-                    <p className="text-muted-foreground">{post.excerpt}</p>
-                  ) : (
-                    post.body && (
-                      <div className="prose dark:prose-invert max-w-none text-muted-foreground">
-                        <PortableText value={post.body} />
-                      </div>
-                    )
+              {posts.map((post) => (
+                <article
+                  key={post._id}
+                  className="group relative overflow-hidden border rounded-lg transition-colors hover:bg-primary/5 sm:flex"
+                >
+                  {post.coverImage && (
+                    <div className="sm:w-64 sm:shrink-0">
+                      <SanityImage
+                        image={post.coverImage}
+                        width={640}
+                        aspect={16 / 9}
+                        sizes="(min-width: 640px) 256px, 100vw"
+                        className="h-full object-cover"
+                      />
+                    </div>
                   )}
+                  <div className="p-6">
+                    <h2 className="text-xl font-semibold mb-2">
+                      {/* Stretched link makes the whole card clickable */}
+                      <Link
+                        href={`/news/${post.slug}`}
+                        className="after:absolute after:inset-0 group-hover:underline"
+                      >
+                        {post.title}
+                      </Link>
+                    </h2>
+                    {post.publishedAt && (
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                      </p>
+                    )}
+                    <p className="text-muted-foreground">{summary(post)}</p>
+                  </div>
                 </article>
               ))}
             </div>
