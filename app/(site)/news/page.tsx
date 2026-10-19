@@ -3,6 +3,7 @@ import { sanityFetch } from "@/sanity/lib/live";
 import { ContentSections } from "@/components/content-sections";
 import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
 import { formatDate } from "@/lib/datetime";
+import { truncateText } from "@/lib/text";
 
 const POSTS_QUERY = `*[_type == "post" && defined(slug.current)] | order(publishedAt desc){
   _id,
@@ -23,13 +24,6 @@ type PostSummary = {
   excerpt?: string;
   bodyText?: string;
 };
-
-// Fall back to the start of the body when a post has no excerpt.
-function summary(post: PostSummary) {
-  if (post.excerpt) return post.excerpt;
-  const text = post.bodyText?.trim() ?? "";
-  return text.length > 200 ? `${text.slice(0, 200).replace(/\s+\S*$/, "")}…` : text;
-}
 
 export default async function NewsPage() {
   const { data } = await sanityFetch({ query: POSTS_QUERY });
@@ -79,7 +73,9 @@ export default async function NewsPage() {
                         <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
                       </p>
                     )}
-                    <p className="text-muted-foreground">{summary(post)}</p>
+                    <p className="text-muted-foreground">
+                      {post.excerpt || truncateText(post.bodyText ?? "", 200)}
+                    </p>
                   </div>
                 </article>
               ))}
