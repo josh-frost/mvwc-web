@@ -20,6 +20,21 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Local Development Data
+
+`.env.local` points at the `production` Sanity dataset. To develop against sample content instead, use the `development` dataset:
+
+```bash
+npx sanity login                     # once, or when your session expires
+npx sanity dataset create development --visibility public   # once
+echo "NEXT_PUBLIC_SANITY_DATASET=development" > .env.development.local
+npm run seed
+```
+
+`.env.development.local` only applies to `next dev`, so `next build` and Vercel keep using `production`. The local Studio at `/admin` will also edit the `development` dataset.
+
+`npm run seed` loads the sample content in [`sanity/seed/seed.ts`](sanity/seed/seed.ts). It uses fixed document IDs, so re-running it resets the sample documents instead of duplicating them, and it refuses to run against `production`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -1,5 +1,8 @@
 import { defineField, defineType } from "sanity";
+import { formatEventDate, SITE_TIME_ZONE } from "../../lib/datetime";
 
+// One-off events: matches, tournaments, and other club events.
+// Recurring practices live on the Schedule Page singleton instead.
 export const eventType = defineType({
   name: "event",
   title: "Event",
@@ -17,7 +20,6 @@ export const eventType = defineType({
       type: "string",
       options: {
         list: [
-          { title: "Practice", value: "practice" },
           { title: "Match", value: "match" },
           { title: "Tournament", value: "tournament" },
           { title: "Other", value: "other" },
@@ -27,22 +29,23 @@ export const eventType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "date",
-      title: "Date",
-      type: "date",
+      name: "start",
+      title: "Start",
+      type: "datetime",
+      description: "Central Time",
+      options: { timeStep: 15, displayTimeZone: SITE_TIME_ZONE, allowTimeZoneSwitch: false },
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "startTime",
-      title: "Start Time",
-      type: "string",
-      description: "e.g., 6:00 PM",
-    }),
-    defineField({
-      name: "endTime",
-      title: "End Time",
-      type: "string",
-      description: "e.g., 8:00 PM",
+      name: "end",
+      title: "End",
+      type: "datetime",
+      options: { timeStep: 15, displayTimeZone: SITE_TIME_ZONE, allowTimeZoneSwitch: false },
+      validation: (Rule) =>
+        Rule.custom((end, context) => {
+          const start = (context.parent as { start?: string } | undefined)?.start;
+          return end && start && end <= start ? "End must be after start" : true;
+        }),
     }),
     defineField({
       name: "location",
@@ -55,29 +58,6 @@ export const eventType = defineType({
       type: "text",
       rows: 3,
     }),
-    // Practice-specific fields
-    defineField({
-      name: "ageGroup",
-      title: "Age Group",
-      type: "string",
-      description: "e.g., K-2, 3-5, 6-8, High School",
-      hidden: ({ parent }) => parent?.eventType !== "practice",
-    }),
-    defineField({
-      name: "isRecurring",
-      title: "Recurring Event",
-      type: "boolean",
-      description: "Is this a recurring practice?",
-      initialValue: false,
-      hidden: ({ parent }) => parent?.eventType !== "practice",
-    }),
-    defineField({
-      name: "recurringPattern",
-      title: "Recurring Pattern",
-      type: "string",
-      description: "e.g., Every Monday and Wednesday",
-      hidden: ({ parent }) => parent?.eventType !== "practice" || !parent?.isRecurring,
-    }),
     // Match/Tournament-specific fields
     defineField({
       name: "opponent",
@@ -89,7 +69,7 @@ export const eventType = defineType({
       name: "isHomeEvent",
       title: "Home Event",
       type: "boolean",
-      description: "Is this a home match?",
+      description: "Is this hosted by MVWC?",
       hidden: ({ parent }) =>
         parent?.eventType !== "match" && parent?.eventType !== "tournament",
     }),
@@ -105,30 +85,27 @@ export const eventType = defineType({
   orderings: [
     {
       title: "Date, Newest",
-      name: "dateDesc",
-      by: [{ field: "date", direction: "desc" }],
+      name: "startDesc",
+      by: [{ field: "start", direction: "desc" }],
     },
     {
       title: "Date, Oldest",
-      name: "dateAsc",
-      by: [{ field: "date", direction: "asc" }],
+      name: "startAsc",
+      by: [{ field: "start", direction: "asc" }],
     },
   ],
   preview: {
     select: {
       title: "title",
       eventType: "eventType",
-      date: "date",
+      start: "start",
       opponent: "opponent",
     },
-    prepare({ title, eventType, date, opponent }) {
+    prepare({ title, eventType, start, opponent }) {
       const typeLabel = eventType
         ? eventType.charAt(0).toUpperCase() + eventType.slice(1)
         : "Event";
-      // Append T00:00:00 to treat the date as local time, not UTC
-      const dateStr = date
-        ? new Date(date + "T00:00:00").toLocaleDateString()
-        : "No date";
+      const dateStr = start ? formatEventDate(start) : "No date";
       const subtitle = opponent
         ? `${typeLabel} vs ${opponent} - ${dateStr}`
         : `${typeLabel} - ${dateStr}`;

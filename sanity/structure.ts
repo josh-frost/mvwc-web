@@ -1,7 +1,7 @@
 import type { StructureResolver } from "sanity/structure";
 
-// Singleton document types - only one instance allowed
-const singletonTypes = new Set(["homePage", "aboutPage", "contactInfo"]);
+// Singleton document types - only one instance allowed, with _id equal to the type name
+export const singletonTypes = new Set(["homePage", "aboutPage", "schedulePage", "contactInfo"]);
 
 // https://www.sanity.io/docs/structure-builder-cheat-sheet
 export const structure: StructureResolver = (S) =>
@@ -17,6 +17,10 @@ export const structure: StructureResolver = (S) =>
         .title("About Page")
         .id("aboutPage")
         .child(S.document().schemaType("aboutPage").documentId("aboutPage")),
+      S.listItem()
+        .title("Schedule Page")
+        .id("schedulePage")
+        .child(S.document().schemaType("schedulePage").documentId("schedulePage")),
       S.listItem()
         .title("Contact Information")
         .id("contactInfo")
