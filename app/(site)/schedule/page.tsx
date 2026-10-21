@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
+import { MapPin } from "lucide-react";
 import { sanityFetch } from "@/sanity/lib/live";
 import { ContentSections } from "@/components/content-sections";
+import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
 import { formatEventDate, formatEventTime } from "@/lib/datetime";
 
 // Upcoming vs. results is decided at render time, so re-render hourly to move
@@ -55,6 +58,21 @@ type ScheduleData = {
   events: Event[];
 };
 
+const SCHEDULE_METADATA_QUERY = `*[_type == "schedulePage" && _id == "schedulePage"][0]{
+  intro, ${SEO_PROJECTION}
+}`;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { data } = await sanityFetch({ query: SCHEDULE_METADATA_QUERY, stega: false });
+  const page = data as { intro?: string; seo?: Seo } | null;
+  return pageMetadata({
+    seo: page?.seo,
+    title: "Schedule",
+    description: page?.intro || "Practice times, upcoming events, and recent results.",
+    path: "/schedule",
+  });
+}
+
 function renderEvent(event: Event) {
   return (
     <div key={event._id} className="border rounded-lg p-4 space-y-2">
@@ -66,10 +84,11 @@ function renderEvent(event: Event) {
         <div className="flex gap-2">
           {event.isHomeEvent !== undefined && event.isHomeEvent !== null && (
             <span
+              // Theme tokens rather than dark: variants, which follow the OS setting, not the theme toggle
               className={`text-sm px-2 py-1 rounded ${
                 event.isHomeEvent
-                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                  : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "border border-border text-foreground"
               }`}
             >
               {event.isHomeEvent ? "Home" : "Away"}
@@ -82,7 +101,12 @@ function renderEvent(event: Event) {
       </div>
       <p className="text-muted-foreground">{formatEventDate(event.start)}</p>
       <p className="text-sm text-muted-foreground">{formatEventTime(event.start, event.end)}</p>
-      {event.location && <p className="text-sm text-muted-foreground">📍 {event.location}</p>}
+      {event.location && (
+        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          {event.location}
+        </p>
+      )}
       {event.result && <p className="text-sm font-medium">Result: {event.result}</p>}
       {event.description && (
         <p className="text-sm text-muted-foreground">{event.description}</p>
@@ -131,7 +155,10 @@ export default async function SchedulePage() {
                       <p className="text-sm text-muted-foreground">{practice.time}</p>
                     )}
                     {practice.location && (
-                      <p className="text-sm text-muted-foreground">📍 {practice.location}</p>
+                      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {practice.location}
+                      </p>
                     )}
                     {practice.notes && (
                       <p className="text-sm text-muted-foreground">{practice.notes}</p>

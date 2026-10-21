@@ -9,6 +9,14 @@ const paths = {
 
 export type SocialPlatform = keyof typeof paths;
 
+// Display names for the platform values in the Contact Information schema
+export const socialPlatformLabels: Record<string, string> = {
+  facebook: "Facebook",
+  instagram: "Instagram",
+  twitter: "X (Twitter)",
+  youtube: "YouTube",
+};
+
 export function isSocialPlatform(value: string): value is SocialPlatform {
   return value in paths;
 }

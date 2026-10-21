@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { telHref } from "@/lib/phone";
 import { sanityFetch } from "@/sanity/lib/live";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { navLinks } from "@/components/navigation/nav-links";
-import { isSocialPlatform, SocialIcon } from "@/components/social-icons";
+import { isSocialPlatform, SocialIcon, socialPlatformLabels } from "@/components/social-icons";
 
 const FOOTER_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
   email,
@@ -19,13 +20,6 @@ type FooterData = {
   city?: string;
   state?: string;
   socialLinks?: { _key: string; platform?: string; url: string }[];
-};
-
-const platformLabels: Record<string, string> = {
-  facebook: "Facebook",
-  instagram: "Instagram",
-  twitter: "X (Twitter)",
-  youtube: "YouTube",
 };
 
 const linkClass = "transition-colors hover:text-foreground";
@@ -61,7 +55,7 @@ export async function Footer() {
           <ul className="flex gap-2">
             {socialLinks.map((link) => {
               const platform = link.platform ?? "";
-              const label = platformLabels[platform] ?? "Social media";
+              const label = socialPlatformLabels[platform] ?? "Social media";
               return (
                 <li key={link._key}>
                   <a
@@ -97,7 +91,7 @@ export async function Footer() {
             {contact?.phone && (
               <li>
                 <a
-                  href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}
+                  href={telHref(contact.phone)}
                   className={`inline-flex items-center gap-1.5 ${linkClass}`}
                 >
                   <Phone className="h-4 w-4" aria-hidden="true" />
