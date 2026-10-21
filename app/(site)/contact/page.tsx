@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { telHref } from "@/lib/phone";
 import { sanityFetch } from "@/sanity/lib/live";
 import { ContentSections } from "@/components/content-sections";
 import { isSocialPlatform, SocialIcon, socialPlatformLabels } from "@/components/social-icons";
@@ -79,7 +80,7 @@ export default async function ContactPage() {
                 <div>
                   <h2 className="text-xl font-semibold mb-2">Phone</h2>
                   <a
-                    href={`tel:${contactInfo.phone.replace(/[^\d+]/g, "")}`}
+                    href={telHref(contactInfo.phone)}
                     className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <Phone className="h-4 w-4" aria-hidden="true" />

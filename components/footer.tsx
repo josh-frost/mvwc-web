@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { telHref } from "@/lib/phone";
 import { sanityFetch } from "@/sanity/lib/live";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { navLinks } from "@/components/navigation/nav-links";
@@ -90,7 +91,7 @@ export async function Footer() {
             {contact?.phone && (
               <li>
                 <a
-                  href={`tel:${contact.phone.replace(/[^\d+]/g, "")}`}
+                  href={telHref(contact.phone)}
                   className={`inline-flex items-center gap-1.5 ${linkClass}`}
                 >
                   <Phone className="h-4 w-4" aria-hidden="true" />

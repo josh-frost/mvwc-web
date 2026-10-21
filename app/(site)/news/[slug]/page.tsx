@@ -36,7 +36,7 @@ export async function generateStaticParams() {
 }
 
 const POST_METADATA_QUERY = `*[_type == "post" && slug.current == $slug][0]{
-  title, excerpt, "bodyText": pt::text(body), coverImage, ${SEO_PROJECTION}
+  title, excerpt, "bodyText": pt::text(body), coverImage, publishedAt, _updatedAt, ${SEO_PROJECTION}
 }`;
 
 type PostPageProps = { params: Promise<{ slug: string }> };
@@ -49,6 +49,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     excerpt?: string;
     bodyText?: string;
     coverImage?: SanityImageValue;
+    publishedAt?: string;
+    _updatedAt?: string;
     seo?: Seo;
   } | null;
   if (!post) return { title: "Post Not Found" };
@@ -60,7 +62,15 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     image: post.coverImage,
     path: `/news/${slug}`,
   });
-  return { ...metadata, openGraph: { ...metadata.openGraph, type: "article" } };
+  return {
+    ...metadata,
+    openGraph: {
+      ...metadata.openGraph,
+      type: "article",
+      publishedTime: post.publishedAt,
+      modifiedTime: post._updatedAt,
+    },
+  };
 }
 
 export default async function PostPage({ params }: PostPageProps) {
