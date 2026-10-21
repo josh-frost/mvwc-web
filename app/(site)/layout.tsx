@@ -5,6 +5,8 @@ import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SanityLive } from "@/sanity/lib/live";
+import { DEFAULT_DESCRIPTION, isProductionDeployment, SITE_NAME, SITE_URL } from "@/lib/site";
+import { BASE_OPEN_GRAPH, DEFAULT_SHARE_IMAGE } from "@/lib/metadata";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,8 +19,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mount Vernon Wrestling Club",
-  description: "Everything MVWC",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  openGraph: { ...BASE_OPEN_GRAPH, images: [DEFAULT_SHARE_IMAGE] },
+  twitter: { card: "summary_large_image", images: [DEFAULT_SHARE_IMAGE] },
+  robots: isProductionDeployment ? undefined : { index: false, follow: false },
 };
 
 export default function SiteLayout({

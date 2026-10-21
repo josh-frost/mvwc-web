@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
+import { MapPin } from "lucide-react";
 import Link from "next/link";
 import type { PortableTextBlock } from "next-sanity";
+import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { SITE_NAME } from "@/lib/site";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { PortableText } from "@/components/portable-text";
 import { ContentSections } from "@/components/content-sections";
@@ -52,6 +56,28 @@ type HomePageData = {
     bodyText?: string;
   }[];
 };
+
+const HOME_METADATA_QUERY = `*[_type == "homePage" && _id == "homePage"][0]{
+  title, subtitle, heroImage, ${SEO_PROJECTION}
+}`;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { data } = await sanityFetch({ query: HOME_METADATA_QUERY, stega: false });
+  const home = data as {
+    title?: string;
+    subtitle?: string;
+    heroImage?: SanityImageValue;
+    seo?: Seo;
+  } | null;
+  return pageMetadata({
+    seo: home?.seo,
+    title: home?.title || SITE_NAME,
+    description: home?.subtitle,
+    image: home?.heroImage,
+    path: "/",
+    absoluteTitle: true,
+  });
+}
 
 export default async function Home() {
   const { data } = await sanityFetch({ query: HOME_QUERY });
@@ -137,7 +163,10 @@ export default async function Home() {
                       {formatEventDate(event.start)} · {formatEventTime(event.start, event.end)}
                     </p>
                     {event.location && (
-                      <p className="text-sm text-muted-foreground">📍 {event.location}</p>
+                      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {event.location}
+                      </p>
                     )}
                   </li>
                 ))}

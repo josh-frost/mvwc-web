@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
+import { pageMetadata } from "@/lib/metadata";
 import { ContentSections } from "@/components/content-sections";
 import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
 import { formatDate } from "@/lib/datetime";
@@ -24,6 +26,12 @@ type PostSummary = {
   excerpt?: string;
   bodyText?: string;
 };
+
+export const metadata: Metadata = pageMetadata({
+  title: "News",
+  description: "Latest news and updates from Mount Vernon Wrestling Club.",
+  path: "/news",
+});
 
 export default async function NewsPage() {
   const { data } = await sanityFetch({ query: POSTS_QUERY });

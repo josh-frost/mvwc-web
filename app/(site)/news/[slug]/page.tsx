@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { truncateText } from "@/lib/text";
 import type { PortableTextBlock } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PortableText } from "@/components/portable-text";
@@ -32,7 +35,35 @@ export async function generateStaticParams() {
   return (data as { slug: string }[] | null) ?? [];
 }
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+const POST_METADATA_QUERY = `*[_type == "post" && slug.current == $slug][0]{
+  title, excerpt, "bodyText": pt::text(body), coverImage, ${SEO_PROJECTION}
+}`;
+
+type PostPageProps = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const { data } = await sanityFetch({ query: POST_METADATA_QUERY, params: { slug }, stega: false });
+  const post = data as {
+    title: string;
+    excerpt?: string;
+    bodyText?: string;
+    coverImage?: SanityImageValue;
+    seo?: Seo;
+  } | null;
+  if (!post) return { title: "Post Not Found" };
+
+  const metadata = pageMetadata({
+    seo: post.seo,
+    title: post.title,
+    description: post.excerpt || truncateText(post.bodyText ?? "", 160),
+    image: post.coverImage,
+    path: `/news/${slug}`,
+  });
+  return { ...metadata, openGraph: { ...metadata.openGraph, type: "article" } };
+}
+
+export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   const { data } = await sanityFetch({ query: POST_QUERY, params: { slug } });
   const post = data as Post | null;
