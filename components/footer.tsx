@@ -3,7 +3,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { sanityFetch } from "@/sanity/lib/live";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { navLinks } from "@/components/navigation/nav-links";
-import { isSocialPlatform, SocialIcon } from "@/components/social-icons";
+import { isSocialPlatform, SocialIcon, socialPlatformLabels } from "@/components/social-icons";
 
 const FOOTER_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
   email,
@@ -19,13 +19,6 @@ type FooterData = {
   city?: string;
   state?: string;
   socialLinks?: { _key: string; platform?: string; url: string }[];
-};
-
-const platformLabels: Record<string, string> = {
-  facebook: "Facebook",
-  instagram: "Instagram",
-  twitter: "X (Twitter)",
-  youtube: "YouTube",
 };
 
 const linkClass = "transition-colors hover:text-foreground";
@@ -61,7 +54,7 @@ export async function Footer() {
           <ul className="flex gap-2">
             {socialLinks.map((link) => {
               const platform = link.platform ?? "";
-              const label = platformLabels[platform] ?? "Social media";
+              const label = socialPlatformLabels[platform] ?? "Social media";
               return (
                 <li key={link._key}>
                   <a
