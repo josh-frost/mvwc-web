@@ -1,5 +1,12 @@
 import { sanityFetch } from "@/sanity/lib/live";
+import { ContentSections } from "@/components/content-sections";
 import { formatEventDate, formatEventTime } from "@/lib/datetime";
+
+// Upcoming vs. results is decided at render time, so re-render hourly to move
+// finished events into results even when no content has changed.
+export const revalidate = 3600;
+
+const MAX_RESULTS = 10;
 
 const SCHEDULE_QUERY = `{
   "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{
@@ -48,10 +55,57 @@ type ScheduleData = {
   events: Event[];
 };
 
+function renderEvent(event: Event) {
+  return (
+    <div key={event._id} className="border rounded-lg p-4 space-y-2">
+      <div className="flex flex-wrap justify-between items-start gap-2">
+        <h3 className="font-semibold">
+          {event.title}
+          {event.opponent && ` vs ${event.opponent}`}
+        </h3>
+        <div className="flex gap-2">
+          {event.isHomeEvent !== undefined && event.isHomeEvent !== null && (
+            <span
+              className={`text-sm px-2 py-1 rounded ${
+                event.isHomeEvent
+                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                  : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+              }`}
+            >
+              {event.isHomeEvent ? "Home" : "Away"}
+            </span>
+          )}
+          <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded capitalize">
+            {event.eventType}
+          </span>
+        </div>
+      </div>
+      <p className="text-muted-foreground">{formatEventDate(event.start)}</p>
+      <p className="text-sm text-muted-foreground">{formatEventTime(event.start, event.end)}</p>
+      {event.location && <p className="text-sm text-muted-foreground">📍 {event.location}</p>}
+      {event.result && <p className="text-sm font-medium">Result: {event.result}</p>}
+      {event.description && (
+        <p className="text-sm text-muted-foreground">{event.description}</p>
+      )}
+    </div>
+  );
+}
+
 export default async function SchedulePage() {
   const { data } = await sanityFetch({ query: SCHEDULE_QUERY });
   const { page, events } = (data as ScheduleData) ?? { page: null, events: [] };
   const practices = page?.practices ?? [];
+
+  // An event counts as upcoming until it ends (or starts, if it has no end).
+  // Reading the clock is intentional: this server component re-renders hourly (see `revalidate`).
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const isUpcoming = (event: Event) => new Date(event.end ?? event.start).getTime() >= now;
+  const upcoming = events.filter(isUpcoming);
+  const results = events
+    .filter((event) => !isUpcoming(event))
+    .reverse()
+    .slice(0, MAX_RESULTS);
 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
@@ -92,55 +146,25 @@ export default async function SchedulePage() {
             )}
           </section>
 
-          {/* Matches, Tournaments & Events */}
           <section>
-            <h2 className="text-2xl font-semibold mb-4">Events</h2>
-            {events.length > 0 ? (
-              <div className="space-y-4">
-                {events.map((event) => (
-                  <div key={event._id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-semibold">
-                        {event.title}
-                        {event.opponent && ` vs ${event.opponent}`}
-                      </h3>
-                      <div className="flex gap-2">
-                        {event.isHomeEvent !== undefined && event.isHomeEvent !== null && (
-                          <span
-                            className={`text-sm px-2 py-1 rounded ${
-                              event.isHomeEvent
-                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                            }`}
-                          >
-                            {event.isHomeEvent ? "Home" : "Away"}
-                          </span>
-                        )}
-                        <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded capitalize">
-                          {event.eventType}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-muted-foreground">{formatEventDate(event.start)}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatEventTime(event.start, event.end)}
-                    </p>
-                    {event.location && (
-                      <p className="text-sm text-muted-foreground">📍 {event.location}</p>
-                    )}
-                    {event.result && (
-                      <p className="text-sm font-medium">Result: {event.result}</p>
-                    )}
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground">{event.description}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+            <h2 className="text-2xl font-semibold mb-4">Upcoming Events</h2>
+            {upcoming.length > 0 ? (
+              <div className="space-y-4">{upcoming.map(renderEvent)}</div>
             ) : (
-              <p className="text-muted-foreground">Event schedule coming soon.</p>
+              <p className="text-muted-foreground">
+                No upcoming events right now. Check back soon.
+              </p>
             )}
           </section>
+
+          {results.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Recent Results</h2>
+              <div className="space-y-4">{results.map(renderEvent)}</div>
+            </section>
+          )}
+
+          <ContentSections page="schedule" />
         </div>
       </div>
     </div>
