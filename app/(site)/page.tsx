@@ -7,6 +7,7 @@ import { SITE_NAME } from "@/lib/site";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { PortableText } from "@/components/portable-text";
 import { ContentSections } from "@/components/content-sections";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
 import { sanityFetch } from "@/sanity/lib/live";
 import { formatDate, formatEventDate, formatEventTime } from "@/lib/datetime";
@@ -21,7 +22,8 @@ const HOME_QUERY = `{
     subtitle,
     showComingSoon,
     heroImage,
-    body
+    body,
+    newsletter{ enabled, heading, text }
   },
   "events": *[_type == "event" && defined(start)] | order(start asc){
     _id, title, start, end, location, opponent
@@ -38,6 +40,7 @@ type HomePageData = {
     showComingSoon?: boolean;
     heroImage?: SanityImageValue;
     body?: PortableTextBlock[];
+    newsletter?: { enabled?: boolean; heading?: string; text?: string };
   } | null;
   events: {
     _id: string;
@@ -87,6 +90,15 @@ export default async function Home() {
     posts: [],
   };
 
+  // Newsletter signup is on unless explicitly turned off in the Studio.
+  const signup =
+    home?.newsletter?.enabled !== false ? (
+      <NewsletterSignup
+        heading={home?.newsletter?.heading || "Stay in the loop"}
+        text={home?.newsletter?.text || "Get club news, schedule updates, and announcements by email."}
+      />
+    ) : null;
+
   if (home?.showComingSoon !== false) {
     return (
       <div className="flex w-full justify-center items-center min-h-[calc(100vh-5rem)] bg-background font-sans">
@@ -95,6 +107,7 @@ export default async function Home() {
           <h1 className="text-center text-balance text-3xl sm:text-4xl font-semibold py-5 text-foreground">
             Coming Soon
           </h1>
+          {signup && <div className="mt-8 w-full max-w-xl">{signup}</div>}
         </main>
       </div>
     );
@@ -212,6 +225,8 @@ export default async function Home() {
             )}
           </section>
         </div>
+
+        {signup && <div className="mx-auto max-w-3xl">{signup}</div>}
       </div>
     </main>
   );

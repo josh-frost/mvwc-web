@@ -35,6 +35,20 @@ npm run seed
 
 `npm run seed` loads the sample content in [`sanity/seed/seed.ts`](sanity/seed/seed.ts). It uses fixed document IDs, so re-running it resets the sample documents instead of duplicating them, and it refuses to run against `production`.
 
+## Newsletter Signup
+
+The home page has an email signup with double opt-in. Signing up sends a confirmation email (from `coaches@mountvernonwrestlingclub.com`) with a signed link that expires in 72 hours; the subscriber is added to Resend only after pressing **Confirm subscription** on `/newsletter/confirm`. Newsletters are written and sent from Resend's **Broadcasts**, which handle unsubscribe links.
+
+Environment variables (set locally in `.env.local` / `.env.development.local`, and in Vercel for Production and Preview):
+
+| Variable | Value |
+| --- | --- |
+| `RESEND_API_KEY` | Resend API key with **full access** (managing contacts isn't allowed with sending-only keys) |
+| `RESEND_NEWSLETTER_SEGMENT_ID` | ID of the Resend segment confirmed subscribers join: **Newsletter** in Production, **Test signups** in Preview and locally |
+| `NEWSLETTER_SECRET` | Random string, at least 32 characters, used to sign confirmation links. Generate with `openssl rand -base64 32`. Use different values per environment. |
+
+Spam protection: Vercel BotID (Basic) on the signup and confirm actions, a hidden honeypot field, a minimum time before submitting, and server-side validation. The response is identical whether or not an address is already subscribed.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

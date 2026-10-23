@@ -42,6 +42,35 @@ export const homePageType = defineType({
       group: "content",
       description: "Optional content to display on the home page",
     }),
+    defineField({
+      name: "newsletter",
+      title: "Newsletter Signup",
+      type: "object",
+      group: "content",
+      description: "Email signup section on the home page (also shown in Coming Soon mode)",
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({
+          name: "enabled",
+          title: "Show signup",
+          type: "boolean",
+          initialValue: true,
+        }),
+        defineField({
+          name: "heading",
+          title: "Heading",
+          type: "string",
+          placeholder: "Stay in the loop",
+        }),
+        defineField({
+          name: "text",
+          title: "Text",
+          type: "text",
+          rows: 2,
+          placeholder: "Get club news, schedule updates, and announcements by email.",
+        }),
+      ],
+    }),
     seoField,
   ],
   preview: {
