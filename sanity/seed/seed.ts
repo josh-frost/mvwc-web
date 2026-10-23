@@ -70,6 +70,11 @@ const documents: Array<{ _id: string; _type: string; [field: string]: unknown }>
     title: "Mount Vernon Wrestling Club",
     subtitle: "Youth wrestling in Mount Vernon, Iowa",
     showComingSoon: false,
+    newsletter: {
+      enabled: true,
+      heading: "Stay in the loop",
+      text: "Sample content: get club news, schedule changes, and tournament updates by email.",
+    },
     body: [
       block(
         "Sample content: MVWC is a youth wrestling club for athletes of all experience levels. " +
