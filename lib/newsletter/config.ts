@@ -1,7 +1,10 @@
 import "server-only";
 import { isProductionDeployment, SITE_NAME, SITE_URL } from "@/lib/site";
 
-// coaches@ is a real inbox, so replies to the confirmation email go straight to the coaches.
+// coaches@ is a Google Workspace group whose members are the coaches' own addresses
+// (posting allowed from outside the organization), so replies reach every coach.
+// Sending works from any address on the domain via Resend's DNS records; receiving
+// depends on this group existing in Google Workspace.
 export const NEWSLETTER_FROM = `${SITE_NAME} <coaches@mountvernonwrestlingclub.com>`;
 
 // Base URL for confirmation links. Production always uses the canonical domain; previews

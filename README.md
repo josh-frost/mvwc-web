@@ -39,6 +39,8 @@ npm run seed
 
 The home page has an email signup with double opt-in. Signing up sends a confirmation email (from `coaches@mountvernonwrestlingclub.com`) with a signed link that expires in 72 hours; the subscriber is added to Resend only after pressing **Confirm subscription** on `/newsletter/confirm`. Newsletters are written and sent from Resend's **Broadcasts**, which handle unsubscribe links.
 
+`coaches@mountvernonwrestlingclub.com` is a Google Workspace group (members: the coaches' own email addresses, posting allowed from anyone on the web), so replies to the confirmation email and newsletters reach the coaches. Resend can send from it because the domain is verified in Resend; receiving relies on the group.
+
 Environment variables (set locally in `.env.local` / `.env.development.local`, and in Vercel for Production and Preview):
 
 | Variable | Value |
