@@ -8,17 +8,21 @@ import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
 
 const ABOUT_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
   title,
+  missionHeading,
   mission,
   image,
   body,
+  historyHeading,
   history
 }`;
 
 type AboutPageData = {
   title?: string;
+  missionHeading?: string;
   mission?: string;
   image?: SanityImageValue;
   body?: PortableTextBlock[];
+  historyHeading?: string;
   history?: PortableTextBlock[];
 };
 
@@ -50,42 +54,52 @@ export default async function AboutPage() {
   return (
     <main className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold mb-6">
+        <h1 className="text-4xl font-bold mb-10 md:mb-12">
           {aboutPage?.title || "Mount Vernon Wrestling Club"}
         </h1>
 
-        {aboutPage?.mission && (
-          <div className="mb-8">
-            <p className="text-xl text-muted-foreground italic">{aboutPage.mission}</p>
-          </div>
-        )}
+        {/* Each block is its own section with the same heading style as Content Sections. */}
+        <div className="space-y-14 md:space-y-16">
+          {aboutPage?.mission && (
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">
+                {aboutPage.missionHeading || "Our Mission"}
+              </h2>
+              <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-line">
+                {aboutPage.mission}
+              </p>
+            </section>
+          )}
 
-        <SanityImage
-          image={aboutPage?.image}
-          width={1200}
-          aspect={16 / 9}
-          sizes="(min-width: 768px) 768px, 100vw"
-          priority
-          className="mb-8 rounded-lg"
-        />
+          <SanityImage
+            image={aboutPage?.image}
+            width={1200}
+            aspect={16 / 9}
+            sizes="(min-width: 768px) 768px, 100vw"
+            priority
+            className="rounded-lg"
+          />
 
-        <PortableText value={aboutPage?.body} className="mb-8" />
+          <PortableText value={aboutPage?.body} />
 
-        <ContentSections page="about" className="mb-12" />
+          <ContentSections page="about" />
 
-        {aboutPage?.history && aboutPage.history.length > 0 && (
-          <section className="mt-12">
-            <h2 className="text-2xl font-semibold mb-4">Our History</h2>
-            <PortableText value={aboutPage.history} />
-          </section>
-        )}
+          {aboutPage?.history && aboutPage.history.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">
+                {aboutPage.historyHeading || "Our History"}
+              </h2>
+              <PortableText value={aboutPage.history} />
+            </section>
+          )}
 
-        {!aboutPage && (
-          <p className="text-muted-foreground">
-            Content coming soon. Check back later for information about Mount Vernon
-            Wrestling Club.
-          </p>
-        )}
+          {!aboutPage && (
+            <p className="text-muted-foreground">
+              Content coming soon. Check back later for information about Mount Vernon
+              Wrestling Club.
+            </p>
+          )}
+        </div>
       </div>
     </main>
   );
