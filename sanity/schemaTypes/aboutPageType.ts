@@ -15,6 +15,14 @@ export const aboutPageType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "missionHeading",
+      title: "Mission Heading",
+      type: "string",
+      group: "content",
+      placeholder: "Our Mission",
+      description: 'Heading shown above the mission statement. Defaults to "Our Mission".',
+    }),
+    defineField({
       name: "mission",
       title: "Mission Statement",
       type: "text",
@@ -29,6 +37,14 @@ export const aboutPageType = defineType({
       type: "blockContent",
       group: "content",
       description: "Main content about the wrestling club",
+    }),
+    defineField({
+      name: "historyHeading",
+      title: "History Heading",
+      type: "string",
+      group: "content",
+      placeholder: "Our History",
+      description: 'Heading shown above the club history. Defaults to "Our History".',
     }),
     defineField({
       name: "history",

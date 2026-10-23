@@ -46,7 +46,13 @@ export function PortableText({
 }) {
   if (!value?.length) return null;
   return (
-    <div className={cn("prose prose-lg max-w-none", className)}>
+    <div
+      className={cn(
+        // Rich-text headings match the site's section headings (h2: text-2xl semibold).
+        "prose prose-lg max-w-none prose-headings:font-semibold prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3",
+        className,
+      )}
+    >
       <BasePortableText value={value} components={components} />
     </div>
   );

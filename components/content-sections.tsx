@@ -37,7 +37,7 @@ export async function ContentSections({
   if (sections.length === 0) return null;
 
   return (
-    <div className={cn("space-y-12", className)}>
+    <div className={cn("space-y-14 md:space-y-16", className)}>
       {sections.map((section) => (
         <section key={section._id} id={section.anchor} className="scroll-mt-24">
           <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
