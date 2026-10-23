@@ -46,7 +46,7 @@ Environment variables (set locally in `.env.local` / `.env.development.local`, a
 | Variable | Value |
 | --- | --- |
 | `RESEND_API_KEY` | Resend API key with **full access** (managing contacts isn't allowed with sending-only keys) |
-| `RESEND_NEWSLETTER_SEGMENT_ID` | ID of the Resend segment confirmed subscribers join: **Newsletter** in Production, **Test signups** in Preview and locally |
+| `RESEND_NEWSLETTER_SEGMENT_ID` | ID of the Resend segment confirmed subscribers join: **Newsletter** in Production, **Test** in Preview and locally |
 | `NEWSLETTER_SECRET` | Random string, at least 32 characters, used to sign confirmation links. Generate with `openssl rand -base64 32`. Use different values per environment. |
 
 Spam protection: Vercel BotID (Basic) on the signup and confirm actions, a hidden honeypot field, a minimum time before submitting, and server-side validation. The response is identical whether or not an address is already subscribed.

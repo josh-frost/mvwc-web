@@ -19,7 +19,7 @@ export function confirmUrl(token: string) {
   return `${newsletterBaseUrl()}/newsletter/confirm?token=${encodeURIComponent(token)}`;
 }
 
-/** Resend segment that confirmed subscribers join ("Newsletter" in production, "Test signups" elsewhere). */
+/** Resend segment that confirmed subscribers join ("Newsletter" in production, "Test" elsewhere). */
 export function newsletterSegmentId() {
   const id = process.env.RESEND_NEWSLETTER_SEGMENT_ID;
   if (!id) throw new Error("RESEND_NEWSLETTER_SEGMENT_ID is not set");
