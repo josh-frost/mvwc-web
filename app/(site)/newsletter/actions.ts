@@ -23,9 +23,16 @@ export async function requestSubscription(_prev: SignupState, formData: FormData
 
   // Bots that fill every field, or that BotID flags, get the normal success response
   // but nothing is sent, so they learn nothing.
-  if (formData.get(HONEYPOT_FIELD)) return { status: "sent" };
+  // Drops are logged (without the address) so false positives can be diagnosed.
+  if (formData.get(HONEYPOT_FIELD)) {
+    console.warn("Newsletter signup dropped: honeypot field was filled");
+    return { status: "sent" };
+  }
   const { isBot } = await checkBotId();
-  if (isBot) return { status: "sent" };
+  if (isBot) {
+    console.warn("Newsletter signup dropped: BotID classified the request as a bot");
+    return { status: "sent" };
+  }
 
   const startedAt = Number(formData.get("startedAt"));
   if (!startedAt || Date.now() - startedAt < MIN_FILL_TIME_MS) {
@@ -58,9 +65,19 @@ export async function requestSubscription(_prev: SignupState, formData: FormData
 /** Step 2: the subscriber clicked "Confirm subscription" on the page the email linked to. */
 export async function confirmSubscription(_prev: ConfirmState, formData: FormData): Promise<ConfirmState> {
   const { isBot } = await checkBotId();
-  if (isBot) return { status: "error", message: GENERIC_ERROR };
+  if (isBot) {
+    console.warn("Newsletter confirm rejected: BotID classified the request as a bot");
+    return { status: "error", message: GENERIC_ERROR };
+  }
 
-  const token = verifyConfirmToken(formData.get("token")?.toString());
+  let token: ReturnType<typeof verifyConfirmToken>;
+  try {
+    token = verifyConfirmToken(formData.get("token")?.toString());
+  } catch (error) {
+    // Misconfiguration (e.g. NEWSLETTER_CONFIRMATION_SECRET missing)
+    console.error("Newsletter token check failed:", error instanceof Error ? error.message : error);
+    return { status: "error", message: GENERIC_ERROR };
+  }
   if (token.status === "expired") {
     return { status: "error", message: "This confirmation link has expired. Please sign up again." };
   }

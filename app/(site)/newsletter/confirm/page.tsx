@@ -19,7 +19,7 @@ export default async function NewsletterConfirmPage({
   try {
     result = verifyConfirmToken(token);
   } catch (error) {
-    // Misconfiguration (e.g. NEWSLETTER_SECRET missing): show the invalid-link message, log why.
+    // Misconfiguration (e.g. NEWSLETTER_CONFIRMATION_SECRET missing): show the invalid-link message, log why.
     console.error("Newsletter token check failed:", error instanceof Error ? error.message : error);
     result = { status: "invalid" };
   }

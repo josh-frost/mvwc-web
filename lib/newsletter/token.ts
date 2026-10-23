@@ -9,9 +9,9 @@ const TOKEN_TTL_MS = 72 * 60 * 60 * 1000;
 type Payload = { e: string; x: number }; // email, expires-at (ms)
 
 function secret() {
-  const value = process.env.NEWSLETTER_SECRET;
+  const value = process.env.NEWSLETTER_CONFIRMATION_SECRET;
   if (!value || value.length < 32) {
-    throw new Error("NEWSLETTER_SECRET must be set to at least 32 characters");
+    throw new Error("NEWSLETTER_CONFIRMATION_SECRET must be set to at least 32 characters");
   }
   return value;
 }
