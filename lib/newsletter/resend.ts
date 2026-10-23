@@ -64,7 +64,8 @@ export async function addSubscriber(email: string) {
     throw new Error(`Resend lookup failed: ${existing.error.name}: ${existing.error.message}`);
   }
 
-  // Existing contact (e.g. a re-subscribe): make sure it's in the segment.
+  // Existing contact (e.g. a re-subscribe): make sure it's in the segment. Adding a
+  // contact that's already in the segment succeeds (verified against the API).
   const added = await resend().contacts.segments.add({ email, segmentId });
   if (added.error) throw new Error(`Resend segment add failed: ${added.error.name}: ${added.error.message}`);
 }
