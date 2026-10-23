@@ -120,10 +120,12 @@ export default async function Home() {
     .filter((event) => new Date(event.end ?? event.start).getTime() >= now)
     .slice(0, 3);
 
+  const hasPreviews = upcoming.length > 0 || posts.length > 0;
+
   return (
     <main className="w-full font-sans">
       {/* Hero */}
-      <section className="flex flex-col items-center px-4 pt-12 pb-8 sm:px-8 md:pt-16">
+      <section className="flex flex-col items-center px-4 pt-12 pb-14 sm:px-8 md:pt-20 md:pb-20">
         {home.heroImage ? (
           <SanityImage
             image={home.heroImage}
@@ -131,10 +133,10 @@ export default async function Home() {
             aspect={21 / 9}
             sizes="(min-width: 1024px) 1024px, 100vw"
             priority
-            className="mb-8 max-w-5xl rounded-lg"
+            className="mb-10 max-w-5xl rounded-lg"
           />
         ) : (
-          <MVWCLogo className="mb-4 w-full max-w-xl h-auto text-primary transition-colors duration-300" />
+          <MVWCLogo className="mb-6 w-full max-w-xl h-auto text-primary transition-colors duration-300" />
         )}
         {home.title && (
           <h1 className="text-center text-balance text-3xl sm:text-4xl font-semibold text-foreground">
@@ -142,91 +144,94 @@ export default async function Home() {
           </h1>
         )}
         {home.subtitle && (
-          <p className="mt-3 text-center text-balance text-lg sm:text-xl text-muted-foreground">
+          <p className="mt-4 text-center text-balance text-lg sm:text-xl text-muted-foreground">
             {home.subtitle}
           </p>
         )}
       </section>
 
-      <div className="mx-auto max-w-5xl px-4 pb-16 sm:px-8 space-y-12">
+      <div className="mx-auto max-w-5xl px-4 pb-20 sm:px-8 md:pb-28 space-y-16 md:space-y-20">
         {home.body && home.body.length > 0 && (
           <PortableText value={home.body} className="mx-auto max-w-3xl" />
         )}
 
         <ContentSections page="home" className="mx-auto max-w-3xl" />
 
-        {/* Upcoming events + latest news */}
-        <div className="grid gap-8 md:grid-cols-2">
-          <section>
-            <div className="mb-4 flex items-baseline justify-between gap-4">
-              <h2 className="text-2xl font-semibold">Upcoming Events</h2>
-              <Link href="/schedule" className="text-sm text-muted-foreground hover:text-foreground">
-                Full schedule →
-              </Link>
-            </div>
-            {upcoming.length > 0 ? (
-              <ul className="space-y-3">
-                {upcoming.map((event) => (
-                  <li key={event._id} className="border rounded-lg p-4">
-                    <p className="font-semibold">
-                      {event.title}
-                      {event.opponent && ` vs ${event.opponent}`}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatEventDate(event.start)} · {formatEventTime(event.start, event.end)}
-                    </p>
-                    {event.location && (
-                      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        {event.location}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">No upcoming events right now.</p>
-            )}
-          </section>
-
-          <section>
-            <div className="mb-4 flex items-baseline justify-between gap-4">
-              <h2 className="text-2xl font-semibold">Latest News</h2>
-              <Link href="/news" className="text-sm text-muted-foreground hover:text-foreground">
-                All news →
-              </Link>
-            </div>
-            {posts.length > 0 ? (
-              <ul className="space-y-3">
-                {posts.map((post) => (
-                  <li
-                    key={post._id}
-                    className="group relative border rounded-lg p-4 transition-colors hover:bg-primary/5"
-                  >
-                    <Link
-                      href={`/news/${post.slug}`}
-                      className="font-semibold after:absolute after:inset-0 group-hover:underline"
-                    >
-                      {post.title}
-                    </Link>
-                    {post.publishedAt && (
-                      <p className="text-sm text-muted-foreground">
-                        <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
-                      </p>
-                    )}
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {post.excerpt || truncateText(post.bodyText ?? "", 140)}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground">News and announcements coming soon.</p>
-            )}
-          </section>
-        </div>
-
+        {/* Signup comes before the previews: it's the main call to action. */}
         {signup && <div className="mx-auto max-w-3xl">{signup}</div>}
+
+        {/* Upcoming events + latest news, each shown only when it has content. */}
+        {hasPreviews && (
+          <div
+            className={`border-t border-border/40 pt-16 md:pt-20 grid gap-12 md:gap-10 ${
+              upcoming.length > 0 && posts.length > 0 ? "md:grid-cols-2" : "mx-auto max-w-3xl"
+            }`}
+          >
+            {upcoming.length > 0 && (
+              <section>
+                <div className="mb-5 flex items-baseline justify-between gap-4">
+                  <h2 className="text-2xl font-semibold">Upcoming Events</h2>
+                  <Link href="/schedule" className="text-sm text-muted-foreground hover:text-foreground">
+                    Full schedule →
+                  </Link>
+                </div>
+                <ul className="space-y-3">
+                  {upcoming.map((event) => (
+                    <li key={event._id} className="border rounded-lg p-4">
+                      <p className="font-semibold">
+                        {event.title}
+                        {event.opponent && ` vs ${event.opponent}`}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatEventDate(event.start)} · {formatEventTime(event.start, event.end)}
+                      </p>
+                      {event.location && (
+                        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                          <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                          {event.location}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {posts.length > 0 && (
+              <section>
+                <div className="mb-5 flex items-baseline justify-between gap-4">
+                  <h2 className="text-2xl font-semibold">Latest News</h2>
+                  <Link href="/news" className="text-sm text-muted-foreground hover:text-foreground">
+                    All news →
+                  </Link>
+                </div>
+                <ul className="space-y-3">
+                  {posts.map((post) => (
+                    <li
+                      key={post._id}
+                      className="group relative border rounded-lg p-4 transition-colors hover:bg-primary/5"
+                    >
+                      <Link
+                        href={`/news/${post.slug}`}
+                        className="font-semibold after:absolute after:inset-0 group-hover:underline"
+                      >
+                        {post.title}
+                      </Link>
+                      {post.publishedAt && (
+                        <p className="text-sm text-muted-foreground">
+                          <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+                        </p>
+                      )}
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {post.excerpt || truncateText(post.bodyText ?? "", 140)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );
