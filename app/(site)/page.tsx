@@ -8,6 +8,12 @@ import { MVWCLogo } from "@/components/mvwc-logo";
 import { PortableText } from "@/components/portable-text";
 import { ContentSections } from "@/components/content-sections";
 import { NewsletterSignup } from "@/components/newsletter-signup";
+import { JsonLd } from "@/components/json-ld";
+import {
+  homeStructuredData,
+  ORGANIZATION_CONTACT_QUERY,
+  type OrganizationContact,
+} from "@/lib/structured-data";
 import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
 import { sanityFetch } from "@/sanity/lib/live";
 import { formatDate, formatEventDate, formatEventTime } from "@/lib/datetime";
@@ -83,7 +89,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const { data } = await sanityFetch({ query: HOME_QUERY });
+  const [{ data }, { data: contact }] = await Promise.all([
+    sanityFetch({ query: HOME_QUERY }),
+    sanityFetch({ query: ORGANIZATION_CONTACT_QUERY, stega: false }),
+  ]);
+  const structuredData = <JsonLd data={homeStructuredData(contact as OrganizationContact)} />;
   const { home, events, posts } = (data as HomePageData | null) ?? {
     home: null,
     events: [],
@@ -102,6 +112,7 @@ export default async function Home() {
   if (home?.showComingSoon !== false) {
     return (
       <div className="flex w-full justify-center items-center min-h-[calc(100vh-5rem)] bg-background font-sans">
+        {structuredData}
         <main className="flex flex-col w-full max-w-3xl items-center justify-center py-16 px-4 sm:px-8 md:px-16">
           <MVWCLogo className="w-full max-w-2xl h-auto text-primary transition-colors duration-300" />
           <h1 className="text-center text-balance text-3xl sm:text-4xl font-semibold py-5 text-foreground">
@@ -124,6 +135,7 @@ export default async function Home() {
 
   return (
     <main className="w-full font-sans">
+      {structuredData}
       {/* Hero */}
       <section className="flex flex-col items-center px-4 pt-12 pb-14 sm:px-8 md:pt-20 md:pb-20">
         {home.heroImage ? (
