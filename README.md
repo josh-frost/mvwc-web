@@ -35,6 +35,22 @@ npm run seed
 
 `npm run seed` loads the sample content in [`sanity/seed/seed.ts`](sanity/seed/seed.ts). It uses fixed document IDs, so re-running it resets the sample documents instead of duplicating them, and it refuses to run against `production`.
 
+## Typed Sanity Queries (TypeGen)
+
+GROQ queries are wrapped in `defineQuery()` (from `next-sanity`), and [Sanity TypeGen](https://www.sanity.io/docs/sanity-typegen) generates `sanity.types.ts` with a type for every document and every query result. `sanityFetch` and `sanityClient.fetch` pick those types up automatically, so there are no hand-written result types or `as` casts, and a renamed field or a typo in a query fails `tsc` instead of silently rendering nothing.
+
+**After changing the schema (`sanity/schemaTypes`) or any query, run:**
+
+```bash
+npm run typegen
+```
+
+and commit the updated `sanity.types.ts`. (`schema.json` is an intermediate file and is gitignored.) The **Sanity types up to date** GitHub check fails a pull request if `sanity.types.ts` is stale.
+
+Notes:
+- Configuration lives under `typegen` in [`sanity.cli.ts`](sanity.cli.ts).
+- Fetched strings are typed as `StegaString` (they may carry invisible visual-editing markers). They render like normal strings, but must be passed through `stegaClean()` before comparing them to fixed values.
+
 ## Newsletter Signup
 
 The home page has an email signup with double opt-in. Signing up sends a confirmation email (from `coaches@mountvernonwrestlingclub.com`) with a signed link that expires in 72 hours; the subscriber is added to Resend only after pressing **Confirm subscription** on `/newsletter/confirm`. Newsletters are written and sent from Resend's **Broadcasts**, which handle unsubscribe links.

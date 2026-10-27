@@ -1,3 +1,4 @@
+import { defineQuery } from "next-sanity";
 import type { MetadataRoute } from "next";
 import { sanityClient } from "@/sanity/lib/client";
 import { SITE_URL } from "@/lib/site";
@@ -5,30 +6,24 @@ import { SITE_URL } from "@/lib/site";
 // Regenerate hourly so new posts appear without a deploy.
 export const revalidate = 3600;
 
-const SITEMAP_QUERY = `{
+const SITEMAP_QUERY = defineQuery(`{
   "pages": *[_id in ["homePage", "aboutPage", "schedulePage", "contactInfo"]]{ _id, _updatedAt },
   "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){
     "slug": slug.current, _updatedAt
   },
   "latestPost": *[_type == "post"] | order(_updatedAt desc)[0]._updatedAt,
   "latestEvent": *[_type == "event"] | order(_updatedAt desc)[0]._updatedAt
-}`;
+}`);
 
-type SitemapData = {
-  pages: { _id: string; _updatedAt: string }[];
-  posts: { slug: string; _updatedAt: string }[];
-  latestPost?: string;
-  latestEvent?: string;
-};
 
 // The newest of the given timestamps, so a page's lastModified reflects any content it shows
-function latest(...dates: (string | undefined)[]) {
+function latest(...dates: (string | null | undefined)[]) {
   const times = dates.filter(Boolean).map((d) => new Date(d as string).getTime());
   return times.length ? new Date(Math.max(...times)) : undefined;
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const data = await sanityClient.fetch<SitemapData>(
+  const data = await sanityClient.fetch(
     SITEMAP_QUERY,
     {},
     { perspective: "published", stega: false, next: { revalidate } },

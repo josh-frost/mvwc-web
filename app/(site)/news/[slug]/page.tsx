@@ -1,29 +1,23 @@
+import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
 import { truncateText } from "@/lib/text";
-import type { PortableTextBlock } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PortableText } from "@/components/portable-text";
-import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
+import { SanityImage } from "@/components/sanity-image";
 import { formatDate } from "@/lib/datetime";
 
-const POST_SLUGS_QUERY = `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`;
+const POST_SLUGS_QUERY = defineQuery(`*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`);
 
-const POST_QUERY = `*[_type == "post" && slug.current == $slug][0]{
+const POST_QUERY = defineQuery(`*[_type == "post" && slug.current == $slug][0]{
   title,
   publishedAt,
   coverImage,
   body
-}`;
+}`);
 
-type Post = {
-  title: string;
-  publishedAt?: string;
-  coverImage?: SanityImageValue;
-  body?: PortableTextBlock[];
-};
 
 // Pre-render every published post at build time; new posts render on first request.
 export async function generateStaticParams() {
@@ -32,27 +26,19 @@ export async function generateStaticParams() {
     perspective: "published",
     stega: false,
   });
-  return (data as { slug: string }[] | null) ?? [];
+  return data;
 }
 
-const POST_METADATA_QUERY = `*[_type == "post" && slug.current == $slug][0]{
+const POST_METADATA_QUERY = defineQuery(`*[_type == "post" && slug.current == $slug][0]{
   title, excerpt, "bodyText": pt::text(body), coverImage, publishedAt, _updatedAt, ${SEO_PROJECTION}
-}`;
+}`);
 
 type PostPageProps = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const { data } = await sanityFetch({ query: POST_METADATA_QUERY, params: { slug }, stega: false });
-  const post = data as {
-    title: string;
-    excerpt?: string;
-    bodyText?: string;
-    coverImage?: SanityImageValue;
-    publishedAt?: string;
-    _updatedAt?: string;
-    seo?: Seo;
-  } | null;
+  const post = data;
   if (!post) return { title: "Post Not Found" };
 
   const metadata = pageMetadata({
@@ -76,7 +62,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
   const { data } = await sanityFetch({ query: POST_QUERY, params: { slug } });
-  const post = data as Post | null;
+  const post = data;
   if (!post) notFound();
 
   return (

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   PortableText as BasePortableText,
-  type PortableTextBlock,
   type PortableTextComponents,
 } from "next-sanity";
 import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
@@ -41,7 +40,8 @@ export function PortableText({
   value,
   className,
 }: {
-  value?: PortableTextBlock[] | null;
+  // Any Portable Text array (e.g. a generated BlockContent type from sanity.types.ts).
+  value?: { _type: string; _key?: string }[] | null;
   className?: string;
 }) {
   if (!value?.length) return null;

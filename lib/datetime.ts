@@ -12,7 +12,7 @@ export function formatEventDate(iso: string) {
   });
 }
 
-export function formatEventTime(start: string, end?: string) {
+export function formatEventTime(start: string, end?: string | null) {
   const fmt = (iso: string) =>
     new Date(iso).toLocaleTimeString("en-US", {
       timeZone: SITE_TIME_ZONE,

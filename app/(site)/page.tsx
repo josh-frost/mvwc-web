@@ -1,20 +1,16 @@
+import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
 import Link from "next/link";
-import type { PortableTextBlock } from "next-sanity";
-import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
 import { SITE_NAME } from "@/lib/site";
 import { MVWCLogo } from "@/components/mvwc-logo";
 import { PortableText } from "@/components/portable-text";
 import { ContentSections } from "@/components/content-sections";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { JsonLd } from "@/components/json-ld";
-import {
-  homeStructuredData,
-  ORGANIZATION_CONTACT_QUERY,
-  type OrganizationContact,
-} from "@/lib/structured-data";
-import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
+import { homeStructuredData, ORGANIZATION_CONTACT_QUERY } from "@/lib/structured-data";
+import { SanityImage } from "@/components/sanity-image";
 import { sanityFetch } from "@/sanity/lib/live";
 import { formatDate, formatEventDate, formatEventTime } from "@/lib/datetime";
 import { truncateText } from "@/lib/text";
@@ -22,7 +18,7 @@ import { truncateText } from "@/lib/text";
 // Upcoming events are picked at render time; re-render hourly so past events drop off.
 export const revalidate = 3600;
 
-const HOME_QUERY = `{
+const HOME_QUERY = defineQuery(`{
   "home": *[_type == "homePage" && _id == "homePage"][0]{
     title,
     subtitle,
@@ -37,47 +33,16 @@ const HOME_QUERY = `{
   "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{
     _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)
   }
-}`;
+}`);
 
-type HomePageData = {
-  home: {
-    title?: string;
-    subtitle?: string;
-    showComingSoon?: boolean;
-    heroImage?: SanityImageValue;
-    body?: PortableTextBlock[];
-    newsletter?: { enabled?: boolean; heading?: string; text?: string };
-  } | null;
-  events: {
-    _id: string;
-    title: string;
-    start: string;
-    end?: string;
-    location?: string;
-    opponent?: string;
-  }[];
-  posts: {
-    _id: string;
-    title: string;
-    slug: string;
-    publishedAt?: string;
-    excerpt?: string;
-    bodyText?: string;
-  }[];
-};
 
-const HOME_METADATA_QUERY = `*[_type == "homePage" && _id == "homePage"][0]{
+const HOME_METADATA_QUERY = defineQuery(`*[_type == "homePage" && _id == "homePage"][0]{
   title, subtitle, heroImage, ${SEO_PROJECTION}
-}`;
+}`);
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data } = await sanityFetch({ query: HOME_METADATA_QUERY, stega: false });
-  const home = data as {
-    title?: string;
-    subtitle?: string;
-    heroImage?: SanityImageValue;
-    seo?: Seo;
-  } | null;
+  const home = data;
   return pageMetadata({
     seo: home?.seo,
     title: home?.title || SITE_NAME,
@@ -93,12 +58,8 @@ export default async function Home() {
     sanityFetch({ query: HOME_QUERY }),
     sanityFetch({ query: ORGANIZATION_CONTACT_QUERY, stega: false }),
   ]);
-  const structuredData = <JsonLd data={homeStructuredData(contact as OrganizationContact)} />;
-  const { home, events, posts } = (data as HomePageData | null) ?? {
-    home: null,
-    events: [],
-    posts: [],
-  };
+  const structuredData = <JsonLd data={homeStructuredData(contact)} />;
+  const { home, events, posts } = data;
 
   // Newsletter signup is on unless explicitly turned off in the Studio.
   const signup =

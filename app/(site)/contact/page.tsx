@@ -1,3 +1,4 @@
+import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { telHref } from "@/lib/phone";
@@ -6,7 +7,7 @@ import { ContentSections } from "@/components/content-sections";
 import { isSocialPlatform, SocialIcon, socialPlatformLabels } from "@/components/social-icons";
 import { pageMetadata } from "@/lib/metadata";
 
-const CONTACT_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
+const CONTACT_QUERY = defineQuery(`*[_type == "contactInfo" && _id == "contactInfo"][0]{
   email,
   phone,
   address,
@@ -14,23 +15,9 @@ const CONTACT_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
   state,
   hours,
   socialLinks[defined(url)]{ _key, platform, url }
-}`;
+}`);
 
-type SocialLink = {
-  _key: string;
-  platform?: string;
-  url: string;
-};
 
-type ContactInfo = {
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  hours?: string;
-  socialLinks?: SocialLink[];
-};
 
 export const metadata: Metadata = pageMetadata({
   title: "Contact",
@@ -40,7 +27,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default async function ContactPage() {
   const { data } = await sanityFetch({ query: CONTACT_QUERY });
-  const contactInfo = data as ContactInfo | null;
+  const contactInfo = data;
 
   const location = [contactInfo?.city, contactInfo?.state].filter(Boolean).join(", ");
   const socialLinks = contactInfo?.socialLinks ?? [];

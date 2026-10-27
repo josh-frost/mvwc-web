@@ -1,8 +1,10 @@
+import { defineQuery, type StegaBranded } from "next-sanity";
 import type { Metadata } from "next";
 import { MapPin } from "lucide-react";
 import { sanityFetch } from "@/sanity/lib/live";
 import { ContentSections } from "@/components/content-sections";
-import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
+import type { SCHEDULE_QUERY_RESULT } from "@/sanity.types";
 import { formatEventDate, formatEventTime } from "@/lib/datetime";
 
 // Upcoming vs. results is decided at render time, so re-render hourly to move
@@ -11,7 +13,7 @@ export const revalidate = 3600;
 
 const MAX_RESULTS = 10;
 
-const SCHEDULE_QUERY = `{
+const SCHEDULE_QUERY = defineQuery(`{
   "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{
     intro,
     practices[]{ _key, group, days, time, location, notes },
@@ -29,42 +31,18 @@ const SCHEDULE_QUERY = `{
     isHomeEvent,
     result
   }
-}`;
+}`);
 
-type Practice = {
-  _key: string;
-  group: string;
-  days?: string[];
-  time?: string;
-  location?: string;
-  notes?: string;
-};
+// Events as fetched: StegaBranded marks strings that may carry visual-editing markers.
+type Event = StegaBranded<SCHEDULE_QUERY_RESULT["events"][number]>;
 
-type Event = {
-  _id: string;
-  title: string;
-  eventType: "match" | "tournament" | "other";
-  start: string;
-  end?: string;
-  location?: string;
-  description?: string;
-  opponent?: string;
-  isHomeEvent?: boolean;
-  result?: string;
-};
-
-type ScheduleData = {
-  page: { intro?: string; practices?: Practice[]; seasonNote?: string } | null;
-  events: Event[];
-};
-
-const SCHEDULE_METADATA_QUERY = `*[_type == "schedulePage" && _id == "schedulePage"][0]{
+const SCHEDULE_METADATA_QUERY = defineQuery(`*[_type == "schedulePage" && _id == "schedulePage"][0]{
   intro, ${SEO_PROJECTION}
-}`;
+}`);
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data } = await sanityFetch({ query: SCHEDULE_METADATA_QUERY, stega: false });
-  const page = data as { intro?: string; seo?: Seo } | null;
+  const page = data;
   return pageMetadata({
     seo: page?.seo,
     title: "Schedule",
@@ -117,7 +95,7 @@ function renderEvent(event: Event) {
 
 export default async function SchedulePage() {
   const { data } = await sanityFetch({ query: SCHEDULE_QUERY });
-  const { page, events } = (data as ScheduleData) ?? { page: null, events: [] };
+  const { page, events } = data;
   const practices = page?.practices ?? [];
 
   // An event counts as upcoming until it ends (or starts, if it has no end).

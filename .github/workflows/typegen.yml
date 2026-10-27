@@ -1,0 +1,32 @@
+name: Sanity types up to date
+
+# Fails if the Sanity schema or a defineQuery() query changed without
+# regenerating sanity.types.ts (run `npm run typegen` and commit the result).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  typegen:
+    runs-on: ubuntu-latest
+    env:
+      # Public values (also shipped to every visitor's browser); loading the
+      # schema reads them via sanity/env.ts.
+      NEXT_PUBLIC_SANITY_PROJECT_ID: z8hzzpf0
+      NEXT_PUBLIC_SANITY_DATASET: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typegen
+      - name: Check sanity.types.ts is committed and current
+        run: |
+          if ! git diff --exit-code -- sanity.types.ts; then
+            echo "::error::sanity.types.ts is out of date. Run 'npm run typegen' and commit the result."
+            exit 1
+          fi
+      - run: npx tsc --noEmit

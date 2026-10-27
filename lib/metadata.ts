@@ -4,13 +4,14 @@ import { urlFor } from "@/sanity/lib/image";
 import { DEFAULT_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 // Matches the `seo` object type in sanity/schemaTypes/seoType.ts
+// Missing values are null (as returned by GROQ) or absent.
 export type Seo = {
-  title?: string;
-  description?: string;
-  image?: SanityImageSource & { asset?: unknown };
+  title?: string | null;
+  description?: string | null;
+  image?: (SanityImageSource & { asset?: unknown }) | null;
 };
 
-type ImageWithAlt = SanityImageSource & { asset?: unknown; alt?: string };
+type ImageWithAlt = SanityImageSource & { asset?: unknown; alt?: string | null };
 
 // GROQ projection for an `seo` field; include in queries used by generateMetadata.
 export const SEO_PROJECTION = `seo{ title, description, image }`;
