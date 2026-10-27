@@ -1,3 +1,4 @@
+import { defineQuery } from "next-sanity";
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { telHref } from "@/lib/phone";
@@ -6,27 +7,20 @@ import { MVWCLogo } from "@/components/mvwc-logo";
 import { navLinks } from "@/components/navigation/nav-links";
 import { isSocialPlatform, SocialIcon, socialPlatformLabels } from "@/components/social-icons";
 
-const FOOTER_QUERY = `*[_type == "contactInfo" && _id == "contactInfo"][0]{
+const FOOTER_QUERY = defineQuery(`*[_type == "contactInfo" && _id == "contactInfo"][0]{
   email,
   phone,
   city,
   state,
   socialLinks[defined(url)]{ _key, platform, url }
-}`;
+}`);
 
-type FooterData = {
-  email?: string;
-  phone?: string;
-  city?: string;
-  state?: string;
-  socialLinks?: { _key: string; platform?: string; url: string }[];
-};
 
 const linkClass = "transition-colors hover:text-foreground";
 
 export async function Footer() {
   const { data } = await sanityFetch({ query: FOOTER_QUERY });
-  const contact = data as FooterData | null;
+  const contact = data;
 
   const location = [contact?.city, contact?.state].filter(Boolean).join(", ");
   const socialLinks = contact?.socialLinks ?? [];

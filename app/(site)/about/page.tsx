@@ -1,12 +1,12 @@
+import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
-import type { PortableTextBlock } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
-import { pageMetadata, SEO_PROJECTION, type Seo } from "@/lib/metadata";
+import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
 import { PortableText } from "@/components/portable-text";
 import { ContentSections } from "@/components/content-sections";
-import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
+import { SanityImage } from "@/components/sanity-image";
 
-const ABOUT_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
+const ABOUT_QUERY = defineQuery(`*[_type == "aboutPage" && _id == "aboutPage"][0]{
   title,
   missionHeading,
   mission,
@@ -14,30 +14,16 @@ const ABOUT_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
   body,
   historyHeading,
   history
-}`;
+}`);
 
-type AboutPageData = {
-  title?: string;
-  missionHeading?: string;
-  mission?: string;
-  image?: SanityImageValue;
-  body?: PortableTextBlock[];
-  historyHeading?: string;
-  history?: PortableTextBlock[];
-};
 
-const ABOUT_METADATA_QUERY = `*[_type == "aboutPage" && _id == "aboutPage"][0]{
+const ABOUT_METADATA_QUERY = defineQuery(`*[_type == "aboutPage" && _id == "aboutPage"][0]{
   title, mission, image, ${SEO_PROJECTION}
-}`;
+}`);
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data } = await sanityFetch({ query: ABOUT_METADATA_QUERY, stega: false });
-  const about = data as {
-    title?: string;
-    mission?: string;
-    image?: SanityImageValue;
-    seo?: Seo;
-  } | null;
+  const about = data;
   return pageMetadata({
     seo: about?.seo,
     title: about?.title || "About",
@@ -49,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function AboutPage() {
   const { data } = await sanityFetch({ query: ABOUT_QUERY });
-  const aboutPage = data as AboutPageData | null;
+  const aboutPage = data;
 
   return (
     <main className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">

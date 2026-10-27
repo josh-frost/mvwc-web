@@ -1,13 +1,14 @@
+import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/live";
 import { pageMetadata } from "@/lib/metadata";
 import { ContentSections } from "@/components/content-sections";
-import { SanityImage, type SanityImageValue } from "@/components/sanity-image";
+import { SanityImage } from "@/components/sanity-image";
 import { formatDate } from "@/lib/datetime";
 import { truncateText } from "@/lib/text";
 
-const POSTS_QUERY = `*[_type == "post" && defined(slug.current)] | order(publishedAt desc){
+const POSTS_QUERY = defineQuery(`*[_type == "post" && defined(slug.current)] | order(publishedAt desc){
   _id,
   title,
   "slug": slug.current,
@@ -15,17 +16,8 @@ const POSTS_QUERY = `*[_type == "post" && defined(slug.current)] | order(publish
   coverImage,
   excerpt,
   "bodyText": pt::text(body)
-}`;
+}`);
 
-type PostSummary = {
-  _id: string;
-  title: string;
-  slug: string;
-  publishedAt?: string;
-  coverImage?: SanityImageValue;
-  excerpt?: string;
-  bodyText?: string;
-};
 
 export const metadata: Metadata = pageMetadata({
   title: "News",
@@ -35,7 +27,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default async function NewsPage() {
   const { data } = await sanityFetch({ query: POSTS_QUERY });
-  const posts = (data as PostSummary[] | null) ?? [];
+  const posts = data;
 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 py-12 md:py-24">

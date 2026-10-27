@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "sanity exec sanity/seed/seed.ts --with-user-token"
+    "seed": "sanity exec sanity/seed/seed.ts --with-user-token",
+    "typegen": "sanity schema extract --enforce-required-fields --force --path schema.json && sanity typegen generate"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
