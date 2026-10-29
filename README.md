@@ -75,12 +75,12 @@ Each post has an **Email this post to subscribers** checkbox (Newsletter tab, of
 - **Once per post:** the first send creates a record document `newsletter-send.<post id>`. While it exists the post can't be emailed again, however often it's edited or republished. The post's **Emailed to subscribers** date is set for display, and the checkbox locks.
 - **If scheduling fails** (e.g. Resend is down), the record is removed and Sanity retries the webhook. Republishing the post also retries. If a send ever gets stuck as `"sending"` (the function crashed mid-send), check Resend's Broadcasts first; if nothing was scheduled, delete the `newsletter-send.<post id>` document (Vision or `npx sanity documents delete`) and republish.
 
-Additional environment variables (Production values in Production; Preview and local share their own):
+Additional environment variables, set in Vercel for **Production only**. Leave them unset in Preview: no webhook points at previews, and without `SANITY_WEBHOOK_SECRET` the route rejects every request, so a preview can never send. Set them in `.env.development.local` only when testing locally (with a separate token), where sends go to the Test segment.
 
 | Variable | Value |
 | --- | --- |
 | `SANITY_WEBHOOK_SECRET` | Random string used to sign webhook requests; the same value goes in the Sanity webhook's **Secret**. Generate with `openssl rand -base64 32`. |
-| `SANITY_API_WRITE_TOKEN` | Sanity API token with the **Editor** role (sanity.io/manage → API → Tokens), used to record sends. Server-only. |
+| `SANITY_API_WRITE_TOKEN` | Sanity API token with the **Editor** role (sanity.io/manage → API → Tokens), used to record sends. Server-only. A Contributor token can't work: it can only write drafts. |
 
 Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
 
