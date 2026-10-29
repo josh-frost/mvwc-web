@@ -18,6 +18,19 @@ function dimensionsFromRef(ref: string) {
   return match ? { width: Number(match[1]), height: Number(match[2]) } : null;
 }
 
+type Crop = { top?: number; bottom?: number; left?: number; right?: number };
+
+// Width / height of the image as delivered: the original proportions, narrowed by any
+// crop the editor applied in the Studio (crop values are fractions of each side).
+function naturalRatio(ref: string, crop: unknown) {
+  const natural = dimensionsFromRef(ref);
+  if (!natural) return 1;
+  const { top = 0, bottom = 0, left = 0, right = 0 } = (crop ?? {}) as Crop;
+  const width = natural.width * (1 - left - right);
+  const height = natural.height * (1 - top - bottom);
+  return width > 0 && height > 0 ? width / height : natural.width / natural.height;
+}
+
 /**
  * Renders a Sanity image. The Sanity CDN produces each responsive size
  * (via a custom loader), so Next's image optimizer isn't involved, and the
@@ -42,8 +55,7 @@ export function SanityImage({
   const ref = image?.asset?._ref ?? image?.asset?._id;
   if (!image || !ref) return null;
 
-  const natural = dimensionsFromRef(ref);
-  const ratio = aspect ?? (natural ? natural.width / natural.height : 1);
+  const ratio = aspect ?? naturalRatio(ref, image.crop);
 
   const loader: ImageLoader = ({ width: w, quality }) => {
     let builder = urlFor(image as SanityImageSource)

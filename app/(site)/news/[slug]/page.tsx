@@ -83,7 +83,6 @@ export default async function PostPage({ params }: PostPageProps) {
         <SanityImage
           image={post.coverImage}
           width={1200}
-          aspect={16 / 9}
           sizes="(min-width: 768px) 768px, 100vw"
           priority
           className="mb-8 rounded-lg"
