@@ -58,6 +58,8 @@ export type Post = {
   };
   excerpt?: string;
   body: BlockContent;
+  emailSubscribers?: boolean;
+  newsletterEmailedAt?: string;
   seo?: Seo;
 };
 
@@ -658,6 +660,27 @@ export type FOOTER_QUERY_RESULT = {
   }> | null;
 } | null;
 
+// Source: lib/newsletter/post-email.ts
+// Variable: NEWSLETTER_POST_QUERY
+// Query: *[_type == "post" && _id == $id][0]{  _id,  title,  "slug": slug.current,  excerpt,  "bodyText": pt::text(body),  coverImage,  emailSubscribers,  newsletterEmailedAt}
+export type NEWSLETTER_POST_QUERY_RESULT = {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  bodyText: string;
+  coverImage: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    alt?: string;
+    _type: "image";
+  } | null;
+  emailSubscribers: boolean | null;
+  newsletterEmailedAt: string | null;
+} | null;
+
 // Source: lib/structured-data.ts
 // Variable: ORGANIZATION_CONTACT_QUERY
 // Query: *[_type == "contactInfo" && _id == "contactInfo"][0]{  email, phone, city, state, socialLinks[defined(url)]{ url }}
@@ -688,6 +711,7 @@ declare global {
     '{\n  "pages": *[_id in ["homePage", "aboutPage", "schedulePage", "contactInfo"]]{ _id, _updatedAt },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){\n    "slug": slug.current, _updatedAt\n  },\n  "latestPost": *[_type == "post"] | order(_updatedAt desc)[0]._updatedAt,\n  "latestEvent": *[_type == "event"] | order(_updatedAt desc)[0]._updatedAt\n}': SITEMAP_QUERY_RESULT;
     '*[_type == "content" && page == $page]\n  | order(coalesce(order, 9999) asc, _createdAt asc){\n  _id,\n  title,\n  "anchor": slug.current,\n  image,\n  body\n}': SECTIONS_QUERY_RESULT;
     '*[_type == "contactInfo" && _id == "contactInfo"][0]{\n  email,\n  phone,\n  city,\n  state,\n  socialLinks[defined(url)]{ _key, platform, url }\n}': FOOTER_QUERY_RESULT;
+    '*[_type == "post" && _id == $id][0]{\n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  "bodyText": pt::text(body),\n  coverImage,\n  emailSubscribers,\n  newsletterEmailedAt\n}': NEWSLETTER_POST_QUERY_RESULT;
     '*[_type == "contactInfo" && _id == "contactInfo"][0]{\n  email, phone, city, state, socialLinks[defined(url)]{ url }\n}': ORGANIZATION_CONTACT_QUERY_RESULT;
   }
 }
