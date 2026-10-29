@@ -1,6 +1,7 @@
 import "server-only";
 import { Resend } from "resend";
 import { confirmUrl, NEWSLETTER_FROM, newsletterSegmentId } from "@/lib/newsletter/config";
+import { escapeHtml } from "@/lib/newsletter/html";
 import { createConfirmToken } from "@/lib/newsletter/token";
 import { SITE_NAME } from "@/lib/site";
 
@@ -14,9 +15,6 @@ function resend() {
   client ??= new Resend(key);
   return client;
 }
-
-const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /** Sends the "confirm your subscription" email with a signed, expiring link. */
 export async function sendConfirmationEmail(email: string) {
@@ -68,4 +66,38 @@ export async function addSubscriber(email: string) {
   // contact that's already in the segment succeeds (verified against the API).
   const added = await resend().contacts.segments.add({ email, segmentId });
   if (added.error) throw new Error(`Resend segment add failed: ${added.error.name}: ${added.error.message}`);
+}
+
+/**
+ * Creates a broadcast to the newsletter segment, scheduled for `scheduledAt` (ISO 8601).
+ * Until then it can be cancelled under Broadcasts in the Resend dashboard.
+ */
+export async function scheduleBroadcast({
+  name,
+  subject,
+  previewText,
+  html,
+  text,
+  scheduledAt,
+}: {
+  name: string;
+  subject: string;
+  previewText?: string;
+  html: string;
+  text: string;
+  scheduledAt: string;
+}) {
+  const { data, error } = await resend().broadcasts.create({
+    name,
+    segmentId: newsletterSegmentId(),
+    from: NEWSLETTER_FROM,
+    subject,
+    previewText,
+    html,
+    text,
+    send: true,
+    scheduledAt,
+  });
+  if (error) throw new Error(`Resend broadcast failed: ${error.name}: ${error.message}`);
+  return data.id;
 }

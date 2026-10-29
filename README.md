@@ -67,6 +67,37 @@ Environment variables (set locally in `.env.local` / `.env.development.local`, a
 
 Spam protection: Vercel BotID (Basic) on the signup and confirm actions, a hidden honeypot field, a minimum time before submitting, and server-side validation. The response is identical whether or not an address is already subscribed.
 
+### Emailing news posts to subscribers
+
+Each post has an **Email this post to subscribers** checkbox (Newsletter tab, off by default). When a post with it ticked is published, a Sanity webhook calls `/api/newsletter/post-published`, which schedules a Resend broadcast to the newsletter segment **10 minutes later**. The email has the cover image, title, summary (the excerpt, or the start of the post) and a **Read the full post** link.
+
+- **To stop a send:** in Resend, open **Broadcasts** and cancel the scheduled broadcast (named `News: <post title>`) before it goes out.
+- **Once per post:** the first send creates a record document `newsletter-send.<post id>`. While it exists the post can't be emailed again, however often it's edited or republished. The post's **Emailed to subscribers** date is set for display, and the checkbox locks.
+- **If scheduling fails** (e.g. Resend is down), the record is removed and Sanity retries the webhook. Republishing the post also retries. If a send ever gets stuck as `"sending"` (the function crashed mid-send), check Resend's Broadcasts first; if nothing was scheduled, delete the `newsletter-send.<post id>` document (Vision or `npx sanity documents delete`) and republish.
+
+Additional environment variables (Production values in Production; Preview and local share their own):
+
+| Variable | Value |
+| --- | --- |
+| `SANITY_WEBHOOK_SECRET` | Random string used to sign webhook requests; the same value goes in the Sanity webhook's **Secret**. Generate with `openssl rand -base64 32`. |
+| `SANITY_API_WRITE_TOKEN` | Sanity API token with the **Editor** role (sanity.io/manage → API → Tokens), used to record sends. Server-only. |
+
+Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
+
+| Setting | Value |
+| --- | --- |
+| Name | Email published posts |
+| URL | `https://www.mountvernonwrestlingclub.com/api/newsletter/post-published` |
+| Dataset | `production` |
+| Trigger on | Create, Update |
+| Filter | `_type == "post" && emailSubscribers == true && !defined(newsletterEmailedAt)` |
+| Projection | `{_id}` |
+| HTTP method | POST |
+| Drafts / Versions | Off (only published posts trigger) |
+| Secret | The Production `SANITY_WEBHOOK_SECRET` |
+
+The route only trusts the signed `_id` and re-reads the post itself, ignores drafts, and skips posts without the checkbox, so the filter is a first line of defense rather than the only one.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
