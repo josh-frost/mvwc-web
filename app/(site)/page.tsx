@@ -25,7 +25,7 @@ const HOME_QUERY = defineQuery(`{
     showComingSoon,
     heroImage,
     body,
-    newsletter{ enabled, heading, text }
+    newsletter{ enabled, heading, text, successHeading, successText }
   },
   "events": *[_type == "event" && defined(start)] | order(start asc){
     _id, title, start, end, location, opponent
@@ -67,6 +67,11 @@ export default async function Home() {
       <NewsletterSignup
         heading={home?.newsletter?.heading || "Stay in the loop"}
         text={home?.newsletter?.text || "Get club news, schedule updates, and announcements by email."}
+        successHeading={home?.newsletter?.successHeading || "Check your inbox to confirm."}
+        successText={
+          home?.newsletter?.successText ||
+          "We sent a confirmation link to your email. If you don't see it in a few minutes, check your spam folder."
+        }
       />
     ) : null;
 

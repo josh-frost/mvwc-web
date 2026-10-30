@@ -27,10 +27,14 @@ async function submitSignup(prev: SignupState, formData: FormData): Promise<Sign
 export function NewsletterSignup({
   heading,
   text,
+  successHeading,
+  successText,
   className,
 }: {
   heading: string;
   text?: string;
+  successHeading: string;
+  successText: string;
   className?: string;
 }) {
   const [state, formAction, pending] = useActionState(submitSignup, initialState);
@@ -57,11 +61,8 @@ export function NewsletterSignup({
         <div role="status" className="mt-6 flex items-start gap-3">
           <MailCheck className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
           <div>
-            <p className="font-semibold">Check your inbox to confirm.</p>
-            <p className="text-sm text-muted-foreground">
-              We sent a confirmation link to your email. If you don&apos;t see it in a few minutes,
-              check your spam folder.
-            </p>
+            <p className="font-semibold">{successHeading}</p>
+            <p className="text-sm text-muted-foreground">{successText}</p>
           </div>
         </div>
       ) : (
