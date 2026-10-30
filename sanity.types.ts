@@ -220,6 +220,8 @@ export type HomePage = {
     enabled?: boolean;
     heading?: string;
     text?: string;
+    successHeading?: string;
+    successText?: string;
   };
   seo?: Seo;
 };
@@ -497,7 +499,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: app/(site)/page.tsx
 // Variable: HOME_QUERY
-// Query: {  "home": *[_type == "homePage" && _id == "homePage"][0]{    title,    subtitle,    showComingSoon,    heroImage,    body,    newsletter{ enabled, heading, text }  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id, title, start, end, location, opponent  },  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)  }}
+// Query: {  "home": *[_type == "homePage" && _id == "homePage"][0]{    title,    subtitle,    showComingSoon,    heroImage,    body,    newsletter{ enabled, heading, text, successHeading, successText }  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id, title, start, end, location, opponent  },  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)  }}
 export type HOME_QUERY_RESULT = {
   home: {
     title: string;
@@ -516,6 +518,8 @@ export type HOME_QUERY_RESULT = {
       enabled: boolean | null;
       heading: string | null;
       text: string | null;
+      successHeading: string | null;
+      successText: string | null;
     } | null;
   } | null;
   events: Array<{
@@ -704,7 +708,7 @@ declare global {
     '*[_type == "post" && slug.current == $slug][0]{\n  title,\n  publishedAt,\n  coverImage,\n  body\n}': POST_QUERY_RESULT;
     '*[_type == "post" && slug.current == $slug][0]{\n  title, excerpt, "bodyText": pt::text(body), coverImage, publishedAt, _updatedAt, seo{ title, description, image }\n}': POST_METADATA_QUERY_RESULT;
     '*[_type == "post" && defined(slug.current)] | order(publishedAt desc){\n  _id,\n  title,\n  "slug": slug.current,\n  publishedAt,\n  coverImage,\n  excerpt,\n  "bodyText": pt::text(body)\n}': POSTS_QUERY_RESULT;
-    '{\n  "home": *[_type == "homePage" && _id == "homePage"][0]{\n    title,\n    subtitle,\n    showComingSoon,\n    heroImage,\n    body,\n    newsletter{ enabled, heading, text }\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id, title, start, end, location, opponent\n  },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{\n    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)\n  }\n}': HOME_QUERY_RESULT;
+    '{\n  "home": *[_type == "homePage" && _id == "homePage"][0]{\n    title,\n    subtitle,\n    showComingSoon,\n    heroImage,\n    body,\n    newsletter{ enabled, heading, text, successHeading, successText }\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id, title, start, end, location, opponent\n  },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{\n    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)\n  }\n}': HOME_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0]{\n  title, subtitle, heroImage, seo{ title, description, image }\n}': HOME_METADATA_QUERY_RESULT;
     '{\n  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{\n    intro,\n    practices[]{ _key, group, days, time, location, notes },\n    seasonNote\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id,\n    title,\n    eventType,\n    start,\n    end,\n    location,\n    description,\n    opponent,\n    isHomeEvent,\n    result\n  }\n}': SCHEDULE_QUERY_RESULT;
     '*[_type == "schedulePage" && _id == "schedulePage"][0]{\n  intro, seo{ title, description, image }\n}': SCHEDULE_METADATA_QUERY_RESULT;

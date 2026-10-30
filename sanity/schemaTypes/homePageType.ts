@@ -69,6 +69,21 @@ export const homePageType = defineType({
           rows: 2,
           placeholder: "Get club news, schedule updates, and announcements by email.",
         }),
+        defineField({
+          name: "successHeading",
+          title: "After signing up: heading",
+          type: "string",
+          description: "Shown in place of the form after someone signs up",
+          placeholder: "Check your inbox to confirm.",
+        }),
+        defineField({
+          name: "successText",
+          title: "After signing up: text",
+          type: "text",
+          rows: 2,
+          placeholder:
+            "We sent a confirmation link to your email. If you don't see it in a few minutes, check your spam folder.",
+        }),
       ],
     }),
     seoField,
