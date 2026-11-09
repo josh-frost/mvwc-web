@@ -98,6 +98,18 @@ Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
 
 The route only trusts the signed `_id` and re-reads the post itself, ignores drafts, and skips posts without the checkbox, so the filter is a first line of defense rather than the only one.
 
+## Dependency Overrides
+
+`overrides` in `package.json` lifts a few transitive packages to their patched releases (same major version) where a dependency still pins a vulnerable one. They come from the Sanity CLI/Studio build tooling and `@tailwindcss/typography`, not code that runs on the live site:
+
+| Override | Pulled in by |
+| --- | --- |
+| `js-yaml@^3` → `^3.15.2`, `smol-toml@^1` → `^1.9.1` | `sanity` → `@sanity/cli` → `@vercel/frameworks` |
+| `undici@^7` → `^7.30.2` | `sanity` → `@sanity/cli` → `@module-federation/dts-plugin` |
+| `postcss-selector-parser@^6` → `^6.1.6` | `@tailwindcss/typography` |
+
+Remove an override once `npm ls <package>` shows the parent already depends on a patched version. The `@types/react` overrides keep type versions in step with the pinned React.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
