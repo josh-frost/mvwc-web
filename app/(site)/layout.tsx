@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import { Navbar } from "@/components/navigation/navbar";
+import { AnnouncementBanner } from "@/components/announcement-banner";
 import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SanityLive } from "@/sanity/lib/live";
@@ -62,6 +63,7 @@ export default function SiteLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <ThemeProvider defaultTheme="home">
+          <AnnouncementBanner />
           <Navbar />
           <div className="flex flex-col items-center">{children}</div>
           <Footer />

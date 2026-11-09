@@ -53,6 +53,12 @@ Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
 | Drafts / Versions | Off (only published changes trigger) |
 | Secret | The Production `SANITY_WEBHOOK_SECRET` (shared with the newsletter webhook) |
 
+## Announcement Banner
+
+**Announcement Banner** in the Studio controls a bar shown above the navigation on every page: a short message, an Info or Urgent style, an optional link, and an optional **Hide after** time. Visitors can dismiss it; it comes back for them whenever the announcement is edited and republished.
+
+Dismissed or expired banners are hidden by a small inline script before the page paints (components/announcement-banner.tsx), so they don't flash; the client component also hides the banner at its expiry time if the page is left open.
+
 ## Typed Sanity Queries (TypeGen)
 
 GROQ queries are wrapped in `defineQuery()` (from `next-sanity`), and [Sanity TypeGen](https://www.sanity.io/docs/sanity-typegen) generates `sanity.types.ts` with a type for every document and every query result. `sanityFetch` and `sanityClient.fetch` pick those types up automatically, so there are no hand-written result types or `as` casts, and a renamed field or a typo in a query fails `tsc` instead of silently rendering nothing.
