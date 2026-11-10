@@ -35,6 +35,24 @@ npm run seed
 
 `npm run seed` loads the sample content in [`sanity/seed/seed.ts`](sanity/seed/seed.ts). It uses fixed document IDs, so re-running it resets the sample documents instead of duplicating them, and it refuses to run against `production`.
 
+## Publishing Updates (Revalidation Webhook)
+
+Pages and their Sanity data are cached. `<SanityLive />` refreshes that cache only when a visitor's open browser receives the change, so without a webhook, content published while nobody has the site open can stay stale indefinitely. A Sanity webhook calls `/api/revalidate` on every published change, which marks every page for refresh; each page re-renders with fresh content on its next visit.
+
+Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
+
+| Setting | Value |
+| --- | --- |
+| Name | Refresh site on publish |
+| URL | `https://www.mountvernonwrestlingclub.com/api/revalidate` |
+| Dataset | `production` |
+| Trigger on | Create, Update, Delete |
+| Filter | `_type != "newsletterSend"` |
+| Projection | `{_type}` |
+| HTTP method | POST |
+| Drafts / Versions | Off (only published changes trigger) |
+| Secret | The Production `SANITY_WEBHOOK_SECRET` (shared with the newsletter webhook) |
+
 ## Typed Sanity Queries (TypeGen)
 
 GROQ queries are wrapped in `defineQuery()` (from `next-sanity`), and [Sanity TypeGen](https://www.sanity.io/docs/sanity-typegen) generates `sanity.types.ts` with a type for every document and every query result. `sanityFetch` and `sanityClient.fetch` pick those types up automatically, so there are no hand-written result types or `as` casts, and a renamed field or a typo in a query fails `tsc` instead of silently rendering nothing.
