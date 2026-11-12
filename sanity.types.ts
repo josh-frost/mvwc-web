@@ -239,6 +239,20 @@ export type Seo = {
   };
 };
 
+export type Announcement = {
+  _id: string;
+  _type: "announcement";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  enabled?: boolean;
+  message?: string;
+  style?: "info" | "urgent";
+  linkUrl?: string;
+  linkText?: string;
+  expiresAt?: string;
+};
+
 export type SanityImagePaletteSwatch = {
   _type: "sanity.imagePaletteSwatch";
   background?: string;
@@ -350,6 +364,7 @@ export type AllSanitySchemaTypes =
   | AboutPage
   | HomePage
   | Seo
+  | Announcement
   | SanityImagePaletteSwatch
   | SanityImagePalette
   | SanityImageDimensions
@@ -631,6 +646,18 @@ export type SITEMAP_QUERY_RESULT = {
   latestEvent: string | null;
 };
 
+// Source: components/announcement-banner.tsx
+// Variable: ANNOUNCEMENT_QUERY
+// Query: *[_type == "announcement" && _id == "announcement" && enabled == true][0]{  _rev,  message,  style,  linkUrl,  linkText,  expiresAt}
+export type ANNOUNCEMENT_QUERY_RESULT = {
+  _rev: string;
+  message: string | null;
+  style: "info" | "urgent" | null;
+  linkUrl: string | null;
+  linkText: string | null;
+  expiresAt: string | null;
+} | null;
+
 // Source: components/content-sections.tsx
 // Variable: SECTIONS_QUERY
 // Query: *[_type == "content" && page == $page]  | order(coalesce(order, 9999) asc, _createdAt asc){  _id,  title,  "anchor": slug.current,  image,  body}
@@ -713,6 +740,7 @@ declare global {
     '{\n  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{\n    intro,\n    practices[]{ _key, group, days, time, location, notes },\n    seasonNote\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id,\n    title,\n    eventType,\n    start,\n    end,\n    location,\n    description,\n    opponent,\n    isHomeEvent,\n    result\n  }\n}': SCHEDULE_QUERY_RESULT;
     '*[_type == "schedulePage" && _id == "schedulePage"][0]{\n  intro, seo{ title, description, image }\n}': SCHEDULE_METADATA_QUERY_RESULT;
     '{\n  "pages": *[_id in ["homePage", "aboutPage", "schedulePage", "contactInfo"]]{ _id, _updatedAt },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){\n    "slug": slug.current, _updatedAt\n  },\n  "latestPost": *[_type == "post"] | order(_updatedAt desc)[0]._updatedAt,\n  "latestEvent": *[_type == "event"] | order(_updatedAt desc)[0]._updatedAt\n}': SITEMAP_QUERY_RESULT;
+    '*[_type == "announcement" && _id == "announcement" && enabled == true][0]{\n  _rev,\n  message,\n  style,\n  linkUrl,\n  linkText,\n  expiresAt\n}': ANNOUNCEMENT_QUERY_RESULT;
     '*[_type == "content" && page == $page]\n  | order(coalesce(order, 9999) asc, _createdAt asc){\n  _id,\n  title,\n  "anchor": slug.current,\n  image,\n  body\n}': SECTIONS_QUERY_RESULT;
     '*[_type == "contactInfo" && _id == "contactInfo"][0]{\n  email,\n  phone,\n  city,\n  state,\n  socialLinks[defined(url)]{ _key, platform, url }\n}': FOOTER_QUERY_RESULT;
     '*[_type == "post" && _id == $id][0]{\n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  "bodyText": pt::text(body),\n  coverImage,\n  emailSubscribers,\n  newsletterEmailedAt\n}': NEWSLETTER_POST_QUERY_RESULT;

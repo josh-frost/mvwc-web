@@ -6,6 +6,7 @@ import { homePageType } from "./homePageType";
 import { aboutPageType } from "./aboutPageType";
 import { schedulePageType } from "./schedulePageType";
 import { contactInfoType } from "./contactInfoType";
+import { announcementType } from "./announcementType";
 import { postType } from "./postType";
 import { eventType } from "./eventType";
 
@@ -15,6 +16,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     blockContentType,
     seoType,
     // Singletons
+    announcementType,
     homePageType,
     aboutPageType,
     schedulePageType,

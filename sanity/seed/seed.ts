@@ -139,6 +139,15 @@ const documents: Array<{ _id: string; _type: string; [field: string]: unknown }>
     ],
   },
   {
+    _id: "announcement",
+    _type: "announcement",
+    enabled: true,
+    message: "Sample announcement: practice moves to the middle school gym this week.",
+    style: "info",
+    linkUrl: "/schedule",
+    linkText: "See the schedule",
+  },
+  {
     _id: "contactInfo",
     _type: "contactInfo",
     email: "info@example.com",
