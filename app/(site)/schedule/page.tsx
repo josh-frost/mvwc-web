@@ -1,8 +1,11 @@
 import { defineQuery, type StegaBranded } from "next-sanity";
 import type { Metadata } from "next";
-import { MapPin } from "lucide-react";
 import { sanityFetch } from "@/sanity/lib/live";
 import { ContentSections } from "@/components/content-sections";
+import { AddToCalendar } from "@/components/add-to-calendar";
+import { CalendarSubscribe } from "@/components/calendar-subscribe";
+import { MapLink } from "@/components/map-link";
+import { clubArea } from "@/lib/maps";
 import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
 import type { SCHEDULE_QUERY_RESULT } from "@/sanity.types";
 import { formatEventDate, formatEventTime } from "@/lib/datetime";
@@ -16,7 +19,7 @@ const MAX_RESULTS = 10;
 const SCHEDULE_QUERY = defineQuery(`{
   "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{
     intro,
-    practices[]{ _key, group, days, time, location, notes },
+    practices[]{ _key, group, days, time, location, address, notes },
     seasonNote
   },
   "events": *[_type == "event" && defined(start)] | order(start asc){
@@ -26,11 +29,13 @@ const SCHEDULE_QUERY = defineQuery(`{
     start,
     end,
     location,
+    address,
     description,
     opponent,
     isHomeEvent,
     result
-  }
+  },
+  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }
 }`);
 
 // Events as fetched: StegaBranded marks strings that may carry visual-editing markers.
@@ -51,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-function renderEvent(event: Event) {
+function renderEvent(event: Event, area: string, upcoming: boolean) {
   return (
     <div key={event._id} className="border rounded-lg p-4 space-y-2">
       <div className="flex flex-wrap justify-between items-start gap-2">
@@ -79,15 +84,20 @@ function renderEvent(event: Event) {
       </div>
       <p className="text-muted-foreground">{formatEventDate(event.start)}</p>
       <p className="text-sm text-muted-foreground">{formatEventTime(event.start, event.end)}</p>
-      {event.location && (
-        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          {event.location}
-        </p>
-      )}
+      <MapLink
+        location={event.location}
+        address={event.address}
+        isHomeEvent={event.isHomeEvent}
+        area={area}
+      />
       {event.result && <p className="text-sm font-medium">Result: {event.result}</p>}
       {event.description && (
         <p className="text-sm text-muted-foreground">{event.description}</p>
+      )}
+      {upcoming && (
+        <div className="pt-1">
+          <AddToCalendar event={event} area={area} />
+        </div>
       )}
     </div>
   );
@@ -95,7 +105,8 @@ function renderEvent(event: Event) {
 
 export default async function SchedulePage() {
   const { data } = await sanityFetch({ query: SCHEDULE_QUERY });
-  const { page, events } = data;
+  const { page, events, contact } = data;
+  const area = clubArea(contact);
   const practices = page?.practices ?? [];
 
   // An event counts as upcoming until it ends (or starts, if it has no end).
@@ -132,12 +143,7 @@ export default async function SchedulePage() {
                     {practice.time && (
                       <p className="text-sm text-muted-foreground">{practice.time}</p>
                     )}
-                    {practice.location && (
-                      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        {practice.location}
-                      </p>
-                    )}
+                    <MapLink location={practice.location} address={practice.address} area={area} />
                     {practice.notes && (
                       <p className="text-sm text-muted-foreground">{practice.notes}</p>
                     )}
@@ -153,8 +159,11 @@ export default async function SchedulePage() {
 
           <section>
             <h2 className="text-2xl font-semibold mb-4">Upcoming Events</h2>
+            <div className="mb-4">
+              <CalendarSubscribe />
+            </div>
             {upcoming.length > 0 ? (
-              <div className="space-y-4">{upcoming.map(renderEvent)}</div>
+              <div className="space-y-4">{upcoming.map((event) => renderEvent(event, area, true))}</div>
             ) : (
               <p className="text-muted-foreground">
                 No upcoming events right now. Check back soon.
@@ -165,7 +174,7 @@ export default async function SchedulePage() {
           {results.length > 0 && (
             <section>
               <h2 className="text-2xl font-semibold mb-4">Recent Results</h2>
-              <div className="space-y-4">{results.map(renderEvent)}</div>
+              <div className="space-y-4">{results.map((event) => renderEvent(event, area, false))}</div>
             </section>
           )}
 

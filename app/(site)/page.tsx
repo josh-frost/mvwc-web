@@ -1,6 +1,5 @@
 import { defineQuery } from "next-sanity";
 import type { Metadata } from "next";
-import { MapPin } from "lucide-react";
 import Link from "next/link";
 import { pageMetadata, SEO_PROJECTION } from "@/lib/metadata";
 import { SITE_NAME } from "@/lib/site";
@@ -11,6 +10,8 @@ import { NewsletterSignup } from "@/components/newsletter-signup";
 import { JsonLd } from "@/components/json-ld";
 import { homeStructuredData, ORGANIZATION_CONTACT_QUERY } from "@/lib/structured-data";
 import { SanityImage } from "@/components/sanity-image";
+import { MapLink } from "@/components/map-link";
+import { clubArea } from "@/lib/maps";
 import { sanityFetch } from "@/sanity/lib/live";
 import { formatDate, formatEventDate, formatEventTime } from "@/lib/datetime";
 import { truncateText } from "@/lib/text";
@@ -28,7 +29,7 @@ const HOME_QUERY = defineQuery(`{
     newsletter{ enabled, heading, text, successHeading, successText }
   },
   "events": *[_type == "event" && defined(start)] | order(start asc){
-    _id, title, start, end, location, opponent
+    _id, title, start, end, location, address, isHomeEvent, opponent
   },
   "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{
     _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)
@@ -163,12 +164,12 @@ export default async function Home() {
                       <p className="text-sm text-muted-foreground">
                         {formatEventDate(event.start)} · {formatEventTime(event.start, event.end)}
                       </p>
-                      {event.location && (
-                        <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                          <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                          {event.location}
-                        </p>
-                      )}
+                      <MapLink
+                        location={event.location}
+                        address={event.address}
+                        isHomeEvent={event.isHomeEvent}
+                        area={clubArea(contact)}
+                      />
                     </li>
                   ))}
                 </ul>
