@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { formatEventDate, SITE_TIME_ZONE } from "../../lib/datetime";
+import { mapAddressField } from "./fields";
 
 // One-off events: matches, tournaments, and other club events.
 // Recurring practices live on the Schedule Page singleton instead.
@@ -52,6 +53,7 @@ export const eventType = defineType({
       title: "Location",
       type: "string",
     }),
+    mapAddressField,
     defineField({
       name: "description",
       title: "Description",

@@ -46,3 +46,13 @@ export const contentGroups = [
   { name: "content", title: "Content", default: true },
   { name: "seo", title: "SEO" },
 ];
+
+// Optional street address behind a location name, used for map links and calendar entries.
+export const mapAddressField = defineField({
+  name: "address",
+  title: "Address (optional)",
+  type: "string",
+  description:
+    "Street address for the map link and calendar, e.g. 123 Main St, Mount Vernon, IA. " +
+    "Without one, maps search for the location name in the club's town (or anywhere, for away events).",
+});

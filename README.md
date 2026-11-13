@@ -59,6 +59,16 @@ Sanity webhook (sanity.io/manage → API → Webhooks → Create webhook):
 
 Dismissed or expired banners are hidden by a small inline script before the page paints (components/announcement-banner.tsx), so they don't flash; the client component also hides the banner at its expiry time if the page is left open.
 
+## Calendar Feed and Map Links
+
+The Schedule page offers the club's events as a calendar people can subscribe to, plus per-event **Add to calendar** and map links:
+
+- **`/calendar.ics`**: subscribable feed of events from the last 90 days onward (practices aren't included; their times are free text). The **iPhone, Mac & Outlook** button opens it as `webcal://`, and **Google Calendar** opens Google's "add calendar" page. Subscribers see new, changed and deleted events on their app's next refresh: Apple and Outlook check every few hours, Google up to a day later. The feed is regenerated hourly and whenever content is published (the revalidation webhook above).
+- **`/calendar/<event id>.ics`**: one event as a download for Apple Calendar or Outlook; the menu also has a prefilled Google Calendar link. Events without an end time get 2 hours.
+- **Map links**: event and practice locations open Google Maps (the maps app on phones). Each has an optional **Address** field in the Studio; without one, the search is the location name plus the club's town from Contact Information (away events get no town added). Add an address whenever the name alone is ambiguous, e.g. "High School Wrestling Room".
+
+Calendar links use the current deployment's URL, so on a local or preview build they point at that build. Google can't reach `localhost` or protected previews; test the Google subscribe option in production.
+
 ## Typed Sanity Queries (TypeGen)
 
 GROQ queries are wrapped in `defineQuery()` (from `next-sanity`), and [Sanity TypeGen](https://www.sanity.io/docs/sanity-typegen) generates `sanity.types.ts` with a type for every document and every query result. `sanityFetch` and `sanityClient.fetch` pick those types up automatically, so there are no hand-written result types or `as` casts, and a renamed field or a typo in a query fails `tsc` instead of silently rendering nothing.

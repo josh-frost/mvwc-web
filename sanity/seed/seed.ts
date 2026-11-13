@@ -238,6 +238,7 @@ const documents: Array<{ _id: string; _type: string; [field: string]: unknown }>
     eventType: "match",
     start: daysFromNow(10),
     location: "Sample Middle School",
+    address: "100 Example Ave, Cedar Rapids, IA",
     opponent: "Sample City WC",
     isHomeEvent: false,
   },
