@@ -7,8 +7,10 @@ export const revalidate = 3600;
 export async function GET(_request: Request, ctx: { params: Promise<{ file: string }> }) {
   const { file } = await ctx.params;
   const id = decodeURIComponent(file).replace(/\.ics$/, "");
-  // Published event IDs never contain dots (drafts and versions do).
-  if (!file.endsWith(".ics") || !id || id.includes(".")) return notFound();
+  // Only these prefixes mark unpublished documents (the "published" perspective below
+  // wouldn't return them anyway). Other dotted IDs are valid, though without a read token
+  // Sanity hides them from this site entirely.
+  if (!file.endsWith(".ics") || !id || /^(drafts|versions)\./.test(id)) return notFound();
 
   const { event, contact } = await sanityClient.fetch(
     CALENDAR_EVENT_QUERY,

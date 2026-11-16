@@ -1,9 +1,12 @@
+import { stegaClean } from "next-sanity";
+
 // The club's town, used to narrow map searches for a bare location name like "Middle School Gym".
 // Contact Information's city and state override it when set.
 const DEFAULT_AREA = "Mount Vernon, IA";
 
 export function clubArea(contact?: { city?: string | null; state?: string | null } | null) {
-  const area = [contact?.city, contact?.state].filter(Boolean).join(", ");
+  // Clean first: in visual-editing mode fetched strings carry hidden markers that would end up in URLs.
+  const area = [stegaClean(contact?.city), stegaClean(contact?.state)].filter(Boolean).join(", ");
   return area || DEFAULT_AREA;
 }
 
