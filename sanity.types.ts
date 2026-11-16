@@ -26,6 +26,7 @@ export type Event = {
   start: string;
   end?: string;
   location?: string;
+  address?: string;
   description?: string;
   opponent?: string;
   isHomeEvent?: boolean;
@@ -167,6 +168,7 @@ export type SchedulePage = {
     days: Array<string>;
     time?: string;
     location?: string;
+    address?: string;
     notes?: string;
     _type: "practice";
     _key: string;
@@ -514,7 +516,7 @@ export type POSTS_QUERY_RESULT = Array<{
 
 // Source: app/(site)/page.tsx
 // Variable: HOME_QUERY
-// Query: {  "home": *[_type == "homePage" && _id == "homePage"][0]{    title,    subtitle,    showComingSoon,    heroImage,    body,    newsletter{ enabled, heading, text, successHeading, successText }  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id, title, start, end, location, opponent  },  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)  }}
+// Query: {  "home": *[_type == "homePage" && _id == "homePage"][0]{    title,    subtitle,    showComingSoon,    heroImage,    body,    newsletter{ enabled, heading, text, successHeading, successText }  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id, title, start, end, location, address, isHomeEvent, opponent  },  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)  }}
 export type HOME_QUERY_RESULT = {
   home: {
     title: string;
@@ -543,6 +545,8 @@ export type HOME_QUERY_RESULT = {
     start: string;
     end: string | null;
     location: string | null;
+    address: string | null;
+    isHomeEvent: boolean | null;
     opponent: string | null;
   }>;
   posts: Array<{
@@ -584,7 +588,7 @@ export type HOME_METADATA_QUERY_RESULT = {
 
 // Source: app/(site)/schedule/page.tsx
 // Variable: SCHEDULE_QUERY
-// Query: {  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{    intro,    practices[]{ _key, group, days, time, location, notes },    seasonNote  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id,    title,    eventType,    start,    end,    location,    description,    opponent,    isHomeEvent,    result  }}
+// Query: {  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{    intro,    practices[]{ _key, group, days, time, location, address, notes },    seasonNote  },  "events": *[_type == "event" && defined(start)] | order(start asc){    _id,    title,    eventType,    start,    end,    location,    address,    description,    opponent,    isHomeEvent,    result  },  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }}
 export type SCHEDULE_QUERY_RESULT = {
   page: {
     intro: string | null;
@@ -594,6 +598,7 @@ export type SCHEDULE_QUERY_RESULT = {
       days: Array<string>;
       time: string | null;
       location: string | null;
+      address: string | null;
       notes: string | null;
     }> | null;
     seasonNote: string | null;
@@ -605,11 +610,16 @@ export type SCHEDULE_QUERY_RESULT = {
     start: string;
     end: string | null;
     location: string | null;
+    address: string | null;
     description: string | null;
     opponent: string | null;
     isHomeEvent: boolean | null;
     result: string | null;
   }>;
+  contact: {
+    city: string | null;
+    state: string | null;
+  } | null;
 };
 
 // Source: app/(site)/schedule/page.tsx
@@ -691,6 +701,54 @@ export type FOOTER_QUERY_RESULT = {
   }> | null;
 } | null;
 
+// Source: lib/calendar.ts
+// Variable: CALENDAR_EVENTS_QUERY
+// Query: {  "events": *[_type == "event" && defined(start) && start >= $since] | order(start asc){    _id, _updatedAt, title, eventType, start, end, location, address, description, opponent, isHomeEvent, result  },  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }}
+export type CALENDAR_EVENTS_QUERY_RESULT = {
+  events: Array<{
+    _id: string;
+    _updatedAt: string;
+    title: string;
+    eventType: "match" | "other" | "tournament";
+    start: string;
+    end: string | null;
+    location: string | null;
+    address: string | null;
+    description: string | null;
+    opponent: string | null;
+    isHomeEvent: boolean | null;
+    result: string | null;
+  }>;
+  contact: {
+    city: string | null;
+    state: string | null;
+  } | null;
+};
+
+// Source: lib/calendar.ts
+// Variable: CALENDAR_EVENT_QUERY
+// Query: {  "event": *[_type == "event" && _id == $id && defined(start)][0]{    _id, _updatedAt, title, eventType, start, end, location, address, description, opponent, isHomeEvent, result  },  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }}
+export type CALENDAR_EVENT_QUERY_RESULT = {
+  event: {
+    _id: string;
+    _updatedAt: string;
+    title: string;
+    eventType: "match" | "other" | "tournament";
+    start: string;
+    end: string | null;
+    location: string | null;
+    address: string | null;
+    description: string | null;
+    opponent: string | null;
+    isHomeEvent: boolean | null;
+    result: string | null;
+  } | null;
+  contact: {
+    city: string | null;
+    state: string | null;
+  } | null;
+};
+
 // Source: lib/newsletter/post-email.ts
 // Variable: NEWSLETTER_POST_QUERY
 // Query: *[_type == "post" && _id == $id][0]{  _id,  title,  "slug": slug.current,  excerpt,  "bodyText": pt::text(body),  coverImage,  emailSubscribers,  newsletterEmailedAt}
@@ -735,14 +793,16 @@ declare global {
     '*[_type == "post" && slug.current == $slug][0]{\n  title,\n  publishedAt,\n  coverImage,\n  body\n}': POST_QUERY_RESULT;
     '*[_type == "post" && slug.current == $slug][0]{\n  title, excerpt, "bodyText": pt::text(body), coverImage, publishedAt, _updatedAt, seo{ title, description, image }\n}': POST_METADATA_QUERY_RESULT;
     '*[_type == "post" && defined(slug.current)] | order(publishedAt desc){\n  _id,\n  title,\n  "slug": slug.current,\n  publishedAt,\n  coverImage,\n  excerpt,\n  "bodyText": pt::text(body)\n}': POSTS_QUERY_RESULT;
-    '{\n  "home": *[_type == "homePage" && _id == "homePage"][0]{\n    title,\n    subtitle,\n    showComingSoon,\n    heroImage,\n    body,\n    newsletter{ enabled, heading, text, successHeading, successText }\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id, title, start, end, location, opponent\n  },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{\n    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)\n  }\n}': HOME_QUERY_RESULT;
+    '{\n  "home": *[_type == "homePage" && _id == "homePage"][0]{\n    title,\n    subtitle,\n    showComingSoon,\n    heroImage,\n    body,\n    newsletter{ enabled, heading, text, successHeading, successText }\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id, title, start, end, location, address, isHomeEvent, opponent\n  },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc)[0...2]{\n    _id, title, "slug": slug.current, publishedAt, excerpt, "bodyText": pt::text(body)\n  }\n}': HOME_QUERY_RESULT;
     '*[_type == "homePage" && _id == "homePage"][0]{\n  title, subtitle, heroImage, seo{ title, description, image }\n}': HOME_METADATA_QUERY_RESULT;
-    '{\n  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{\n    intro,\n    practices[]{ _key, group, days, time, location, notes },\n    seasonNote\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id,\n    title,\n    eventType,\n    start,\n    end,\n    location,\n    description,\n    opponent,\n    isHomeEvent,\n    result\n  }\n}': SCHEDULE_QUERY_RESULT;
+    '{\n  "page": *[_type == "schedulePage" && _id == "schedulePage"][0]{\n    intro,\n    practices[]{ _key, group, days, time, location, address, notes },\n    seasonNote\n  },\n  "events": *[_type == "event" && defined(start)] | order(start asc){\n    _id,\n    title,\n    eventType,\n    start,\n    end,\n    location,\n    address,\n    description,\n    opponent,\n    isHomeEvent,\n    result\n  },\n  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }\n}': SCHEDULE_QUERY_RESULT;
     '*[_type == "schedulePage" && _id == "schedulePage"][0]{\n  intro, seo{ title, description, image }\n}': SCHEDULE_METADATA_QUERY_RESULT;
     '{\n  "pages": *[_id in ["homePage", "aboutPage", "schedulePage", "contactInfo"]]{ _id, _updatedAt },\n  "posts": *[_type == "post" && defined(slug.current)] | order(publishedAt desc){\n    "slug": slug.current, _updatedAt\n  },\n  "latestPost": *[_type == "post"] | order(_updatedAt desc)[0]._updatedAt,\n  "latestEvent": *[_type == "event"] | order(_updatedAt desc)[0]._updatedAt\n}': SITEMAP_QUERY_RESULT;
     '*[_type == "announcement" && _id == "announcement" && enabled == true][0]{\n  _rev,\n  message,\n  style,\n  linkUrl,\n  linkText,\n  expiresAt\n}': ANNOUNCEMENT_QUERY_RESULT;
     '*[_type == "content" && page == $page]\n  | order(coalesce(order, 9999) asc, _createdAt asc){\n  _id,\n  title,\n  "anchor": slug.current,\n  image,\n  body\n}': SECTIONS_QUERY_RESULT;
     '*[_type == "contactInfo" && _id == "contactInfo"][0]{\n  email,\n  phone,\n  city,\n  state,\n  socialLinks[defined(url)]{ _key, platform, url }\n}': FOOTER_QUERY_RESULT;
+    '{\n  "events": *[_type == "event" && defined(start) && start >= $since] | order(start asc){\n    _id, _updatedAt, title, eventType, start, end, location, address, description, opponent, isHomeEvent, result\n  },\n  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }\n}': CALENDAR_EVENTS_QUERY_RESULT;
+    '{\n  "event": *[_type == "event" && _id == $id && defined(start)][0]{\n    _id, _updatedAt, title, eventType, start, end, location, address, description, opponent, isHomeEvent, result\n  },\n  "contact": *[_type == "contactInfo" && _id == "contactInfo"][0]{ city, state }\n}': CALENDAR_EVENT_QUERY_RESULT;
     '*[_type == "post" && _id == $id][0]{\n  _id,\n  title,\n  "slug": slug.current,\n  excerpt,\n  "bodyText": pt::text(body),\n  coverImage,\n  emailSubscribers,\n  newsletterEmailedAt\n}': NEWSLETTER_POST_QUERY_RESULT;
     '*[_type == "contactInfo" && _id == "contactInfo"][0]{\n  email, phone, city, state, socialLinks[defined(url)]{ url }\n}': ORGANIZATION_CONTACT_QUERY_RESULT;
   }

@@ -1,5 +1,5 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { contentGroups, seoField } from "./fields";
+import { contentGroups, mapAddressField, seoField } from "./fields";
 
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -56,6 +56,7 @@ export const schedulePageType = defineType({
               title: "Location",
               type: "string",
             }),
+            mapAddressField,
             defineField({
               name: "notes",
               title: "Notes",
